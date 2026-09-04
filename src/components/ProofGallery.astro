@@ -1,0 +1,62 @@
+---
+import { Image } from 'astro:assets';
+import { img, altFor } from '@/data/media';
+
+export interface Props {
+  items?: { key: string; caption: string; where?: string }[];
+}
+
+const defaults = [
+  {
+    key: 'before-after-window-split',
+    caption: 'One pane, half cleaned. The left side is what a season of Tucson dust does to glass.',
+    where: 'Window cleaning',
+  },
+  {
+    key: 'before-after-solar-2',
+    caption: 'Two panels on one roof. The left one is still carrying the dust that was costing production.',
+    where: 'Solar panel cleaning',
+  },
+  {
+    key: 'before-after-patio-split',
+    caption: 'One patio, washed up to the halfway line. Same slab, same afternoon — that colour was always under there.',
+    where: 'Pressure washing',
+  },
+];
+
+const { items = defaults } = Astro.props;
+---
+<ul class="pg">
+  {items.map((it, i) => (
+    <li class="pg-item reveal" style={`transition-delay:${(i % 3) * 80}ms`}>
+      <figure>
+        <div class="pg-media">
+          <Image src={img(it.key)} alt={altFor(it.key)} widths={[420, 760, 1100]} sizes="(max-width: 560px) 92vw, (max-width: 1100px) 46vw, 32vw" quality={76} class="cover" />
+          <span class="pg-tag">{it.where}</span>
+        </div>
+        <figcaption>{it.caption}</figcaption>
+      </figure>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .pg { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.2vw, 1.6rem); }
+  @media (max-width: 1100px) { .pg { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px)  { .pg { grid-template-columns: 1fr; } }
+
+  .pg-item figure { margin: 0; }
+  .pg-media {
+    position: relative; aspect-ratio: 3/4; border-radius: var(--radius-lg); overflow: hidden;
+    background: var(--surface-3); box-shadow: var(--shadow-sm);
+  }
+  .pg-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .pg-tag {
+    position: absolute; left: .8rem; bottom: .8rem;
+    padding: .35rem .8rem; border-radius: 999px;
+    background: rgba(18,24,50,.82); backdrop-filter: blur(8px);
+    color: #fff; font-family: var(--font-display); font-weight: 700; font-size: .78rem;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  figcaption { margin-top: .85rem; color: var(--ink-2); font-size: .96rem; line-height: 1.5; }
+</style>

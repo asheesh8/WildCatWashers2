@@ -1,0 +1,274 @@
+---
+import { Image } from 'astro:assets';
+import { company, proof, cta } from '@/data/business';
+import { img } from '@/data/media';
+import AskWildcat from '@/components/AskWildcat.astro';
+
+/**
+ * Cinematic scroll hero.
+ *
+ * A tall runway holds a sticky, full-height frame. As the visitor scrolls the
+ * runway, two lines of copy fade through the film and the brand block lands and
+ * stays — the same beat structure as the Black Sheep build.
+ *
+ * It degrades honestly: with reduced motion, or no JS at all, the runway
+ * collapses to a single screen and the brand block is simply there.
+ */
+const poster = img('hero-film-poster');
+const beats = ['A thousand homes.', 'Not one review below five stars.'];
+---
+
+<section class="ch" data-cinematic aria-labelledby="hero-title">
+  <div class="ch-sticky">
+    <div class="ch-media" aria-hidden="true">
+      <Image
+        src={poster}
+        alt=""
+        widths={[640, 1024, 1600, 2000]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        quality={68}
+        class="ch-poster"
+      />
+      <video
+        class="ch-video"
+        data-hero-video
+        muted loop playsinline preload="none"
+        tabindex="-1"
+        data-src-lg="/video/hero-film.mp4"
+        data-src-sm="/video/hero-film-sm.mp4"
+      ></video>
+      <div class="ch-veil"></div>
+    </div>
+
+    <p class="ch-place">Greater Tucson, Arizona</p>
+
+    {beats.map((b, i) => (
+      <div class="ch-beat" data-beat={i} aria-hidden="true"><p>{b}</p></div>
+    ))}
+
+    <div class="ch-brand" data-brand>
+      <img
+        class="ch-mark"
+        src="/brand/logo-stacked-outline.svg"
+        alt=""
+        width="420" height="420"
+        loading="eager"
+        decoding="async"
+      />
+      <h1 id="hero-title">We have a<br />spotless reputation.</h1>
+      <p class="ch-sub">
+        {proof.customersServedLabel} homes and businesses across {company.region} &mdash;
+        and you don&rsquo;t pay until you&rsquo;re happy.
+      </p>
+
+      <div class="ch-actions">
+        <a class="btn btn-lg" href="/quote/" data-track="quote-hero">{cta.primary}</a>
+        <a class="btn btn-lg btn-outline-light" href={`tel:${company.phoneRaw}`} data-track="call-hero">
+          {company.phone}
+        </a>
+      </div>
+
+      <div class="ch-ask">
+        <AskWildcat variant="compact" placeholder="Or just ask — “do you serve Green Valley?”" />
+      </div>
+    </div>
+
+    <div class="ch-progress" aria-hidden="true"><span data-progress-bar></span></div>
+  </div>
+</section>
+
+<style>
+  /* The runway. Height above 100svh is the distance the beats play over. */
+  .ch { position: relative; height: 230svh; background: var(--navy); color: #fff; }
+
+  .ch-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; isolation: isolate; }
+
+  .ch-media, .ch-media :global(.ch-poster), .ch-video, .ch-veil {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  .ch-media :global(.ch-poster), .ch-video {
+    object-fit: cover; object-position: center 55%;
+    /* Slow push-in across the scroll, driven by --p (0 → 1). */
+    transform: scale(calc(1.03 + (var(--p, 0) * 0.05)));
+    will-change: transform;
+  }
+  .ch-video { opacity: 0; transition: opacity .9s ease; z-index: 1; }
+  .ch-video.is-playing { opacity: 1; }
+
+  .ch-veil {
+    z-index: 2;
+    /* Only enough shading to seat the caption — the film stays legible. */
+    background: linear-gradient(180deg, rgba(9,13,30,.34) 0%, transparent 26%, transparent 52%, rgba(9,13,30,.78) 100%);
+  }
+
+  .ch-place {
+    position: absolute; z-index: 3; top: 1.6rem; left: var(--gutter);
+    font-family: var(--font-display); font-weight: 700;
+    font-size: .68rem; letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(255,255,255,.78);
+  }
+
+  /* --------------------------------------------------------------- beats */
+  .ch-beat {
+    position: absolute; z-index: 3; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--gutter);
+    pointer-events: none; opacity: 0;
+    transition: opacity 120ms linear;
+  }
+  .ch-beat p {
+    margin: 0; max-width: 16ch; text-align: center;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: clamp(2rem, 5.2vw, 4.4rem);
+    line-height: .94; letter-spacing: -.045em; text-transform: uppercase;
+    text-shadow: 0 2px 40px rgba(0,0,0,.5);
+  }
+
+  /* --------------------------------------------------------------- brand */
+  /* Centred, and kept small on purpose — the film is the hero, this is the
+     caption under it. */
+  .ch-brand {
+    position: absolute; z-index: 4;
+    left: 0; right: 0; bottom: clamp(1.25rem, 3.5vh, 2.25rem);
+    padding-inline: var(--gutter);
+    display: grid; justify-items: center; text-align: center;
+    opacity: 0; transition: opacity 160ms linear;
+  }
+  .ch-mark {
+    width: clamp(126px, 13vw, 182px);
+    height: auto;
+    margin-bottom: .7rem;
+    filter: drop-shadow(0 6px 22px rgba(0,0,0,.42));
+  }
+  .ch-brand h1 {
+    color: #fff;
+    font-size: clamp(1.75rem, 3.2vw, 2.9rem);
+    line-height: 1; letter-spacing: -.035em; text-transform: uppercase;
+    margin-bottom: .45rem;
+    text-shadow: 0 2px 24px rgba(0,0,0,.45);
+  }
+  .ch-sub {
+    color: #dbe2f0; font-size: clamp(.9rem, 1.05vw, 1rem);
+    line-height: 1.45; max-width: 42ch; margin-bottom: .95rem;
+  }
+  .ch-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-bottom: .9rem; }
+  .ch-actions .btn { min-height: 48px; padding-inline: 1.4rem; font-size: .96rem; }
+
+  /* A quiet utility, not a second hero. */
+  .ch-ask { width: min(100%, 440px); }
+  .ch-ask :global(.ask-form) {
+    background: rgba(255,255,255,.94);
+    border-color: rgba(255,255,255,.5);
+    backdrop-filter: blur(10px);
+    padding: .25rem .25rem .25rem .8rem;
+  }
+  .ch-ask :global(.ask-input) { font-size: .9rem; padding-block: .45rem; }
+  .ch-ask :global(.ask-go) { min-height: 38px; padding: 0 .95rem; font-size: .86rem; }
+  /* Suggestion chips belong on the FAQ page, not stacked over the film. */
+  .ch-ask :global(.ask-hint) { display: none; }
+
+  /* ------------------------------------------------------------ progress */
+  .ch-progress {
+    position: absolute; z-index: 5; left: 0; right: 0; bottom: 0;
+    height: 3px; background: rgba(255,255,255,.16);
+  }
+  .ch-progress span {
+    display: block; height: 100%; background: var(--cyan);
+    transform-origin: left center; transform: scaleX(var(--p, 0));
+  }
+
+  @media (max-width: 760px) {
+    .ch { height: 205svh; }
+    .ch-brand { bottom: 1rem; }
+    .ch-mark { width: clamp(104px, 24vw, 138px); margin-bottom: .5rem; }
+    .ch-actions { width: 100%; }
+    .ch-actions .btn { flex: 1 1 calc(50% - .3rem); padding-inline: .75rem; }
+  }
+
+  /* No JS: one screen, brand visible, no scroll theatre. */
+  .ch:not(.is-live) { height: 100svh; }
+  .ch:not(.is-live) .ch-brand { opacity: 1; }
+  .ch:not(.is-live) .ch-beat { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch { height: 100svh !important; }
+    .ch-brand { opacity: 1 !important; }
+    .ch-beat { display: none !important; }
+    .ch-media :global(.ch-poster), .ch-video { transform: none !important; }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const section = document.querySelector('[data-cinematic]');
+    if (!section) return;
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const beats = [...section.querySelectorAll('[data-beat]')];
+    const brand = section.querySelector('[data-brand]');
+    const bar = section.querySelector('[data-progress-bar]');
+    const video = section.querySelector('[data-hero-video]');
+
+    // Fade a beat in over [start, peakStart], hold to peakEnd, out by end.
+    const band = (p, start, peakStart, peakEnd, end) => {
+      if (p <= start || p >= end) return 0;
+      if (p < peakStart) return (p - start) / (peakStart - start);
+      if (p <= peakEnd) return 1;
+      return 1 - (p - peakEnd) / (end - peakEnd);
+    };
+    const BEATS = [
+      [0.00, 0.05, 0.20, 0.32],
+      [0.26, 0.34, 0.48, 0.60],
+    ];
+
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(1, section.offsetHeight - innerHeight);
+      const p = Math.min(1, Math.max(0, -rect.top / distance));
+      section.style.setProperty('--p', p.toFixed(4));
+      beats.forEach((el, i) => (el.style.opacity = String(band(p, ...BEATS[i]))));
+      if (brand) brand.style.opacity = String(Math.min(1, Math.max(0, (p - 0.55) / 0.16)));
+      if (bar) bar.style.transform = `scaleX(${Math.max(0.02, p)})`;
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(paint); };
+
+    const enable = () => {
+      if (reduced.matches) {
+        section.classList.remove('is-live');
+        removeEventListener('scroll', onScroll);
+        removeEventListener('resize', onScroll);
+        return;
+      }
+      section.classList.add('is-live');
+      addEventListener('scroll', onScroll, { passive: true });
+      addEventListener('resize', onScroll);
+      paint();
+    };
+    enable();
+    if (reduced.addEventListener) reduced.addEventListener('change', enable);
+
+    if (!video || reduced.matches) return;
+    const conn = navigator.connection;
+    if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+
+    const start = () => {
+      video.src = video.getAttribute(matchMedia('(max-width: 900px)').matches ? 'data-src-sm' : 'data-src-lg');
+      video.load();
+      video.play().then(() => video.classList.add('is-playing')).catch(() => {});
+    };
+    const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 400));
+    if (document.readyState === 'complete') idle(start);
+    else addEventListener('load', () => idle(start), { once: true });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([e]) => { if (video.src) e.isIntersecting ? video.play().catch(() => {}) : video.pause(); },
+        { threshold: 0.02 }
+      ).observe(video);
+    }
+  })();
+</script>

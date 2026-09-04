@@ -1,0 +1,60 @@
+---
+import { company, cta, proof } from '@/data/business';
+export interface Props {
+  title?: string;
+  lede?: string;
+  service?: string;
+  area?: string;
+}
+const {
+  title = 'Ready for the cleanest glass on your street?',
+  lede = 'Tell us what you need. You get a fixed price, usually the same day — and you don’t pay a cent until you’ve seen the work and you’re happy with it.',
+  service,
+  area,
+} = Astro.props;
+const qs = [service && `service=${service}`, area && `area=${area}`].filter(Boolean).join('&');
+const quoteHref = `/quote/${qs ? `?${qs}` : ''}`;
+---
+<section class="ctab tone-navy">
+  <div class="wrap ctab-in">
+    <div class="ctab-text">
+      <p class="eyebrow">Free, no-obligation quote</p>
+      <h2>{title}</h2>
+      <p class="lede">{lede}</p>
+      <ul class="ctab-points">
+        <li>Fixed price before you book</li>
+        <li>You don’t pay until you’re happy</li>
+        <li>14-Day Spotless Guarantee</li>
+      </ul>
+    </div>
+    <div class="ctab-actions">
+      <a class="btn btn-lg btn-block" href={quoteHref} data-track="quote-band">{cta.primary}</a>
+      <a class="btn btn-lg btn-outline-light btn-block" href={`tel:${company.phoneRaw}`} data-track="call-band">
+        Call or text {company.phone}
+      </a>
+      <p class="ctab-note">{proof.customersServedLabel} homes cleaned across {company.region} · {company.hoursHuman}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ctab { position: relative; overflow: hidden; padding-block: clamp(3.5rem, 7vw, 6rem); }
+  .ctab::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 120% at 88% 12%, rgba(54,198,244,.20), transparent 62%),
+      radial-gradient(50% 100% at 6% 96%, rgba(217,30,61,.16), transparent 60%);
+    pointer-events: none;
+  }
+  .ctab-in { position: relative; display: grid; grid-template-columns: 1.25fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+  .ctab-text h2 { margin-block: .55rem .8rem; }
+  .ctab-points { list-style: none; margin: 1.4rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .55rem 1.6rem; font-weight: 600; font-size: .96rem; color: #cbd5ea; }
+  .ctab-points li { display: flex; align-items: center; gap: .5rem; }
+  .ctab-points li::before {
+    content: ''; width: 20px; height: 20px; border-radius: 50%; flex: none;
+    background: rgba(54,198,244,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2336c6f4' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat;
+  }
+  .ctab-actions { display: grid; gap: .8rem; }
+  .ctab-note { font-size: .87rem; color: #8a95b4; text-align: center; margin-top: .3rem; }
+  @media (max-width: 900px) { .ctab-in { grid-template-columns: 1fr; } }
+</style>

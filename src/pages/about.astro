@@ -1,0 +1,183 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { company, proof, awards, safety, allAreaNames } from '@/data/business';
+import { img, altFor } from '@/data/media';
+
+const schema = [{
+  '@type': 'AboutPage',
+  mainEntity: { '@id': `${company.url}/#business` },
+}];
+---
+<Base
+  title="About Wildcat Washers | Tucson Window Cleaning Company"
+  description={`Wildcat Washers is a licensed, insured window cleaning company serving Greater Tucson. ${proof.customersServedLabel} customers, never a review below 5 stars, and the 2025 AZ-19 Readers' Pick for best window cleaner.`}
+  canonical="/about/"
+  schema={schema}
+  breadcrumbs={[{ name: 'About', href: '/about/' }]}
+>
+  <section class="ahero">
+    <div class="wrap ahero-in">
+      <div>
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">About</span></nav>
+        <h1>A <span class="swipe">spotless</span> reputation, earned one house at a time.</h1>
+        <p class="lede">
+          Wildcat Washers cleans windows, solar panels and exterior surfaces across
+          {' '}{company.region}. {proof.customersServedLabel} customers later, we have still never
+          received a review below five stars — which is the entire reason the tagline says what it says.
+        </p>
+        <div class="ahero-cta">
+          <a class="btn btn-lg" href="/quote/">Get your free quote</a>
+          <a class="btn btn-lg btn-ghost" href="/reviews/">Read the reviews</a>
+        </div>
+      </div>
+      <figure class="ahero-fig">
+        <Image src={img('team-on-truck-desert')} alt={altFor('team-on-truck-desert')} widths={[440, 820, 1100]} sizes="(max-width: 940px) 92vw, 46vw" loading="eager" fetchpriority="high" quality={78} class="cover" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap two">
+      <div>
+        <SectionHead eyebrow="How it started" title="Two people, two squeegees, one summer." />
+        <div class="prose">
+          <p>
+            Wildcat Washers began the way a lot of good Tucson businesses do — with
+            {' '}{company.founders.join(' and ')}, a couple of squeegees, and a plan to earn money for
+            school by cleaning windows properly instead of quickly.
+          </p>
+          <p>
+            The plan worked because of one decision made early: never leave a house until the
+            customer had actually looked at it. That single habit turned into a walkthrough, the
+            walkthrough turned into a guarantee, and the guarantee turned into a business that
+            has grown almost entirely on neighbours telling neighbours.
+          </p>
+          <p>
+            Today Wildcat Washers is a licensed, insured operation running a weekly route through
+            {' '}{allAreaNames()} — with uniformed crews, marked trucks, and the same
+            walk-it-before-you-pay standard that started the whole thing.
+          </p>
+        </div>
+      </div>
+      <figure class="fig">
+        <Image src={img('founders-yard-sign')} alt={altFor('founders-yard-sign')} widths={[420, 780]} sizes="(max-width: 900px) 92vw, 42vw" quality={76} class="cover" />
+        <figcaption>{company.founders.join(' and ')}, who started it.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="What we are obsessive about" title="Three things, in this order." />
+      <ol class="vals">
+        <li>
+          <span>.01</span>
+          <h3>The quality of the work</h3>
+          <p>Glass, frames, sills, tracks and screens — the whole opening, not just the pane in the middle of it. If we cleaned only the glass, the window would look dirty again inside a week.</p>
+        </li>
+        <li>
+          <span>.02</span>
+          <h3>How it feels to deal with us</h3>
+          <p>Confirmed appointments, an introduction at the door, protection down before anything gets wet, and an answer when you call. Most complaints in this trade are about communication, not cleaning.</p>
+        </li>
+        <li>
+          <span>.03</span>
+          <h3>Whether you are actually happy</h3>
+          <p>We walk the property with you in daylight before we ask for payment. Anything you point out gets fixed there and then. That is how you get to a thousand customers without a single review below five stars.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section tone-navy">
+    <div class="wrap">
+      <SectionHead eyebrow="Recognition" title="What other people have said." lede="We would rather show you awards other people voted on than adjectives we picked ourselves." />
+      <div class="aw">
+        {awards.map((a) => (
+          <article>
+            <h3>{a.name}</h3>
+            <p>{a.issuer}</p>
+          </article>
+        ))}
+      </div>
+      <figure class="aw-fig">
+        <Image src={img('award-presentation-team')} alt={altFor('award-presentation-team')} widths={[440, 820]} sizes="(max-width: 900px) 92vw, 46vw" quality={76} class="cover" />
+        <figcaption>Receiving the 2025 AZ-19 Readers’ Pick for Best Window Cleaner — voted by Green Valley News and Sahuarita Sun readers.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="In your home" title="How we behave on site." lede="The specifics matter more than the adjectives." />
+      <ul class="safety">{safety.map((s) => <li><h3>{s.title}</h3><p>{s.body}</p></li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="Around town" title="You have probably seen the trucks." />
+      <ul class="gal">
+        {['team-truck-lineup-tucson','team-fire-station-truck','team-lineup-commercial-plaza','crew-fire-station-commercial','two-techs-window-ladder','team-living-room-supplies'].map((k) => (
+          <li><Image src={img(k)} alt={altFor(k)} widths={[380, 700, 950]} sizes="(max-width: 700px) 92vw, 31vw" quality={74} class="cover" /></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand title="Come and see what a spotless reputation looks like." />
+</Base>
+
+<style>
+  .ahero { padding-block: clamp(2rem, 5vw, 3.5rem) clamp(2.5rem, 5vw, 4rem); }
+  .ahero-in { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 940px) { .ahero-in { grid-template-columns: 1fr; } }
+  .ahero h1 { font-size: var(--step-4); margin-block: .55rem .8rem; text-transform: none; }
+  .ahero .lede { max-width: 56ch; margin-bottom: 1.75rem; }
+  .ahero-cta { display: flex; flex-wrap: wrap; gap: .7rem; }
+  @media (max-width: 620px) { .ahero-cta .btn { flex: 1 1 100%; } }
+  .ahero-fig { margin: 0; }
+  .ahero-fig :global(img) { width: 100%; border-radius: var(--radius-xl); aspect-ratio: 4/3; object-fit: cover; box-shadow: var(--shadow-lg); }
+  .crumbs { font-size: .85rem; color: var(--ink-3); display: flex; gap: .4rem; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs span[aria-current] { color: var(--navy); font-weight: 600; }
+
+  .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  .prose { display: grid; gap: 1rem; color: var(--ink-2); line-height: 1.7; max-width: 62ch; }
+  .fig { margin: 0; }
+  .fig :global(img) { width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/5; object-fit: cover; }
+  .fig figcaption { margin-top: .7rem; font-size: .9rem; color: var(--ink-3); }
+
+  .vals { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 2.5rem); }
+  @media (max-width: 860px) { .vals { grid-template-columns: 1fr; } }
+  .vals li { padding-top: 1.25rem; border-top: 3px solid var(--cyan); display: grid; gap: .45rem; align-content: start; }
+  .vals span { font-family: var(--font-display); font-weight: 900; color: var(--cyan-600); font-size: 1rem; }
+  .vals h3 { font-size: 1.22rem; }
+  .vals p { color: var(--ink-2); line-height: 1.65; font-size: .99rem; }
+
+  .aw { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+  @media (max-width: 1000px) { .aw { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .aw { grid-template-columns: 1fr; } }
+  .aw article { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.13); border-radius: var(--radius); padding: 1.2rem; }
+  .aw h3 { font-size: 1rem; color: var(--cyan); margin-bottom: .3rem; line-height: 1.25; }
+  .aw p { font-size: .86rem; color: #a4b0cf; line-height: 1.45; }
+  .aw-fig { margin: 0; max-width: 620px; }
+  .aw-fig :global(img) { width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; }
+  .aw-fig figcaption { margin-top: .8rem; font-size: .92rem; color: #9aa6c4; line-height: 1.55; }
+
+  .safety { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.25rem, 3vw, 2.25rem); }
+  @media (max-width: 900px) { .safety { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .safety { grid-template-columns: 1fr; } }
+  .safety li { padding-top: 1rem; border-top: 2px solid var(--cyan); }
+  .safety h3 { font-size: 1.05rem; margin-bottom: .3rem; }
+  .safety p { color: var(--ink-2); font-size: .95rem; line-height: 1.6; }
+
+  .gal { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.8rem, 1.8vw, 1.35rem); }
+  @media (max-width: 700px) { .gal { grid-template-columns: 1fr 1fr; } }
+  .gal li { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; background: var(--surface-3); }
+  .gal :global(img) { width: 100%; height: 100%; object-fit: cover; }
+</style>

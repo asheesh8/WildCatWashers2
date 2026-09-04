@@ -1,0 +1,185 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import FaqAccordion from '@/components/FaqAccordion.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import QuoteForm from '@/components/QuoteForm.astro';
+import { faqById, company, proof, services, allAreaNames } from '@/data/business';
+import { img, altFor } from '@/data/media';
+
+const propertyTypes = [
+  { name: 'Offices and professional suites', body: 'Entry glass, interior partitions and exterior windows, scheduled around your working hours.' },
+  { name: 'Storefronts and retail', body: 'The glass your customers judge you by, cleaned before you open rather than while they are shopping.' },
+  { name: 'Restaurants and cafés', body: 'Front-of-house glass and patio enclosures, done before service or after close.' },
+  { name: 'Apartment and HOA communities', body: 'Common areas, clubhouses, leasing offices and unit exteriors on a recurring schedule.' },
+  { name: 'Medical and professional buildings', body: 'Quiet, uniformed crews who understand a waiting room is not a worksite.' },
+  { name: 'Municipal and community buildings', body: 'We already do this work locally — including fire stations in the Tucson area.' },
+];
+
+const cFaqs = [faqById['commercial-hours'], faqById['insured'], faqById['recurring'], faqById['areas'], faqById['payment']].filter(Boolean);
+const schema = [{ '@type': 'FAQPage', mainEntity: cFaqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }];
+---
+<Base
+  title="Commercial Window Cleaning in Tucson, AZ | Wildcat Washers"
+  description="Commercial window cleaning, solar panel cleaning and pressure washing for Tucson-area offices, storefronts, restaurants, apartment communities and municipal buildings. Licensed, insured, and scheduled around your hours."
+  canonical="/commercial/"
+  schema={schema}
+  breadcrumbs={[{ name: 'Commercial', href: '/commercial/' }]}
+>
+  <section class="chero">
+    <div class="chero-bg">
+      <Image src={img('crew-fire-station-commercial')} alt={altFor('crew-fire-station-commercial')} widths={[720, 1200, 1800]} sizes="100vw" loading="eager" fetchpriority="high" quality={70} class="cover" />
+      <div class="chero-scrim"></div>
+    </div>
+    <div class="wrap chero-in">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Commercial</span></nav>
+      <h1>Commercial cleaning that <span class="swipe">never</span> gets in the way.</h1>
+      <p class="lede">
+        Before you open, after you close, or whenever suits. Offices, storefronts, restaurants,
+        apartment communities and municipal buildings across {allAreaNames()}.
+      </p>
+      <div class="chero-cta">
+        <a class="btn btn-lg" href="/quote/?service=multiple">Request a commercial quote</a>
+        <a class="btn btn-lg btn-outline-light" href={`tel:${company.phoneRaw}`}>Call {company.phone}</a>
+      </div>
+      <ul class="chero-proof">
+        <li>Licensed &amp; insured</li>
+        <li>BBB accredited</li>
+        <li>Recurring schedules available</li>
+        <li>Documentation on request</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Who we work with" title="Property types we service." />
+      <ul class="ptypes">
+        {propertyTypes.map((p, i) => (
+          <li><span>.{String(i + 1).padStart(2, '0')}</span><h3>{p.name}</h3><p>{p.body}</p></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap two">
+      <div>
+        <SectionHead eyebrow="What matters commercially" title="Reliability is the product." lede="For a business, the cleaning is table stakes. What you are really buying is a contractor who turns up when they said they would." />
+        <ul class="ticks big">
+          <li><strong>Scheduled around your hours.</strong> Before opening, after closing, or on weekends — your customers never work around us.</li>
+          <li><strong>Recurring, not chased.</strong> Set a frequency once and we come back on it. You should not have to remember.</li>
+          <li><strong>One contractor, several properties.</strong> Multi-site portfolios run on a single schedule and a single point of contact.</li>
+          <li><strong>Minimal disruption.</strong> Uniformed crews, contained equipment, and walkways kept clear while we work.</li>
+          <li><strong>Documentation when you need it.</strong> Licence and insurance details supplied before we start on your site.</li>
+        </ul>
+      </div>
+      <figure class="fig">
+        <Image src={img('team-lineup-commercial-plaza')} alt={altFor('team-lineup-commercial-plaza')} widths={[420, 780]} sizes="(max-width: 900px) 92vw, 42vw" quality={76} class="cover" />
+        <figcaption>A Wildcat crew on a Tucson commercial property.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="What we clean" title="Three services, commercially." />
+      <ul class="csvc">
+        {services.map((s) => (
+          <li>
+            <Image src={img(s.cardImage)} alt={altFor(s.cardImage)} widths={[380, 700]} sizes="(max-width: 800px) 92vw, 31vw" quality={74} class="cover" />
+            <div>
+              <h3>{s.name}</h3>
+              <p>{s.summary}</p>
+              <a href={`/services/${s.slug}/`}>See the full service →</a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section tone-navy">
+    <div class="wrap local">
+      <div>
+        <SectionHead eyebrow="Local proof" title="Already trusted locally." lede={`${proof.customersServedLabel} customers across Greater Tucson — residential and commercial — and no public review below five stars.`} />
+        <p class="local-p">
+          Our commercial work includes municipal properties in the Tucson area. That is the kind
+          of client who checks licensing and insurance before anyone gets on a ladder, which is
+          exactly how it should be.
+        </p>
+      </div>
+      <figure class="local-fig">
+        <Image src={img('team-fire-station-truck')} alt={altFor('team-fire-station-truck')} widths={[420, 800]} sizes="(max-width: 900px) 92vw, 46vw" quality={76} class="cover" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap faq-wrap">
+      <SectionHead eyebrow="Questions" title="Commercial FAQs." />
+      <FaqAccordion items={cFaqs} />
+    </div>
+  </section>
+
+  <CtaBand title="Let’s scope your property." lede="Tell us the property type, roughly how much glass, and the hours that suit. We'll come back with a fixed price and a schedule." />
+
+  <section class="section">
+    <div class="wrap-narrow">
+      <SectionHead align="center" eyebrow="Commercial quote" title="Request a scope and price." />
+      <QuoteForm id="commercial-quote" service="multiple" />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .chero { position: relative; isolation: isolate; padding-block: clamp(3rem, 7vw, 5.5rem); color: #fff; overflow: hidden; }
+  .chero-bg { position: absolute; inset: 0; z-index: -1; }
+  .chero-bg :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .chero-scrim { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(9,13,30,.95) 0%, rgba(9,13,30,.82) 50%, rgba(9,13,30,.50) 100%); }
+  .chero-in { max-width: 780px; }
+  .chero h1 { font-size: var(--step-4); color: #fff; margin-block: .55rem .8rem; text-transform: none; }
+  .chero h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .chero .lede { max-width: 60ch; margin-bottom: 1.75rem; }
+  .chero-cta { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1.5rem; }
+  @media (max-width: 640px) { .chero-cta .btn { flex: 1 1 100%; } }
+  .chero-proof { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; font-size: .92rem; font-weight: 600; color: #c3cde6; }
+  .chero-proof li::before { content: '✓'; color: var(--cyan); font-weight: 900; margin-right: .4rem; }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+
+  .ptypes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.25rem, 3vw, 2.25rem); }
+  @media (max-width: 900px) { .ptypes { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .ptypes { grid-template-columns: 1fr; } }
+  .ptypes li { padding-top: 1.2rem; border-top: 3px solid var(--cyan); display: grid; gap: .35rem; align-content: start; }
+  .ptypes span { font-family: var(--font-display); font-weight: 900; color: var(--cyan-600); font-size: .95rem; }
+  .ptypes h3 { font-size: 1.14rem; }
+  .ptypes p { color: var(--ink-2); font-size: .96rem; line-height: 1.6; }
+
+  .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  .ticks.big li { font-size: 1rem; line-height: 1.55; }
+  .ticks.big strong { color: var(--navy); }
+  .fig { margin: 0; }
+  .fig :global(img) { width: 100%; border-radius: var(--radius-xl); aspect-ratio: 4/3; object-fit: cover; box-shadow: var(--shadow); }
+  .fig figcaption { margin-top: .7rem; font-size: .9rem; color: var(--ink-3); }
+
+  .csvc { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.5vw, 1.75rem); }
+  @media (max-width: 800px) { .csvc { grid-template-columns: 1fr; } }
+  .csvc li { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+  .csvc :global(img) { width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+  .csvc div { padding: 1.3rem 1.4rem 1.5rem; display: grid; gap: .5rem; align-content: start; }
+  .csvc h3 { font-size: 1.2rem; }
+  .csvc p { color: var(--ink-2); font-size: .95rem; line-height: 1.55; }
+  .csvc a { font-family: var(--font-display); font-weight: 700; font-size: .95rem; text-decoration: none; }
+
+  .local { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 900px) { .local { grid-template-columns: 1fr; } }
+  .local-p { color: #b6c1dc; line-height: 1.65; max-width: 58ch; }
+  .local-fig { margin: 0; }
+  .local-fig :global(img) { width: 100%; border-radius: var(--radius-xl); aspect-ratio: 4/3; object-fit: cover; }
+
+  .faq-wrap { max-width: 900px; }
+</style>

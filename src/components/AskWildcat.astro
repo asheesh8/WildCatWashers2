@@ -1,0 +1,426 @@
+---
+/**
+ * ASK WILDCAT — the hero's natural-language front door.
+ *
+ * A visitor types "I need someone to clean my windows in Green Valley" or
+ * "how much for solar panels" and gets a real answer plus the right next step.
+ *
+ * It runs entirely on the client against /ask-index.json — an index generated
+ * from the fact bank at build time. No API key, no model call, no latency, and
+ * nothing it can invent: every answer it gives already exists on this site.
+ *
+ * The index is fetched once on first intent (focus, typing, or hovering a chip)
+ * and cached by the browser across every page, so it costs the initial render
+ * nothing. See src/pages/ask-index.json.ts.
+ */
+
+export interface Props {
+  variant?: 'hero' | 'inline' | 'compact';
+  placeholder?: string;
+  heading?: string;
+}
+
+const {
+  variant = 'hero',
+  placeholder = 'Try “I need my windows cleaned in Green Valley”',
+  heading,
+} = Astro.props;
+
+const suggestions = [
+  'How much does window cleaning cost?',
+  'Do you serve Green Valley?',
+  'Solar panel cleaning',
+  'What’s your guarantee?',
+  'Pressure wash my driveway',
+];
+
+---
+
+<div class:list={['ask', `ask-${variant}`]} data-ask>
+  {heading && <h2 class="ask-heading">{heading}</h2>}
+
+  <form class="ask-form" role="search" data-ask-form autocomplete="off">
+    <label class="sr-only" for={`ask-input-${variant}`}>
+      What do you need cleaned? Ask a question or describe the job.
+    </label>
+    <span class="ask-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 1 9 9c0 1.5-.4 3-1 4.2l1 4.3-4.4-1a9 9 0 1 1-4.6-16.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="8.5" cy="12" r="1.15" fill="currentColor"/><circle cx="12" cy="12" r="1.15" fill="currentColor"/><circle cx="15.5" cy="12" r="1.15" fill="currentColor"/></svg>
+    </span>
+    <input
+      id={`ask-input-${variant}`}
+      type="search"
+      name="q"
+      class="ask-input"
+      placeholder={placeholder}
+      data-ask-input
+      aria-describedby={`ask-hint-${variant}`}
+      enterkeyhint="search"
+    />
+    <button type="submit" class="ask-go" aria-label="Get an answer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Ask</span>
+    </button>
+  </form>
+
+  <p class="ask-hint" id={`ask-hint-${variant}`}>
+    <span class="ask-hint-label">Popular:</span>
+    {suggestions.map((s) => (
+      <button type="button" class="ask-chip" data-ask-suggest={s}>{s}</button>
+    ))}
+  </p>
+
+  <div class="ask-panel" data-ask-panel hidden aria-live="polite"></div>
+</div>
+
+<style>
+  .ask { width: 100%; }
+  .ask-heading { font-size: var(--step-2); margin-bottom: 1rem; }
+
+  /* ------------------------------------------------------------ the bar */
+  .ask-form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: #fff;
+    border-radius: 999px;
+    padding: .45rem .45rem .45rem 1.1rem;
+    box-shadow: 0 10px 30px rgba(18, 24, 50, .18), 0 2px 6px rgba(18, 24, 50, .10);
+    border: 2px solid transparent;
+    transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
+  }
+  .ask-form:focus-within {
+    border-color: var(--cyan);
+    box-shadow: 0 12px 36px rgba(18, 24, 50, .22), 0 0 0 5px rgba(54, 198, 244, .22);
+  }
+  .ask-icon { flex: none; color: var(--cyan-600); display: grid; place-items: center; }
+  .ask-icon svg { width: 24px; height: 24px; }
+
+  .ask-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    outline: none;
+    padding: .8rem .2rem;
+    font-size: 1.06rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .ask-input::placeholder { color: var(--ink-3); font-weight: 400; }
+  .ask-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+  .ask-go {
+    flex: none;
+    display: inline-flex; align-items: center; gap: .45rem;
+    min-height: 52px; padding: 0 1.5rem;
+    border: 0; border-radius: 999px;
+    background: var(--red); color: #fff;
+    font-family: var(--font-display); font-weight: 800; font-size: 1rem;
+    letter-spacing: -.01em;
+    box-shadow: var(--shadow-cta);
+    transition: background .16s var(--ease), transform .16s var(--ease);
+  }
+  .ask-go:hover { background: var(--red-600); transform: translateY(-1px); }
+  .ask-go svg { width: 19px; height: 19px; }
+
+  @media (max-width: 560px) {
+    .ask-form { padding-left: .85rem; gap: .35rem; }
+    .ask-icon svg { width: 21px; height: 21px; }
+    .ask-input { font-size: 1rem; padding-block: .7rem; }
+    .ask-go { padding: 0 1rem; min-height: 48px; }
+    .ask-go span { display: none; }
+  }
+
+  /* ---------------------------------------------------------- chip row */
+  .ask-hint {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .45rem;
+    margin-top: .9rem;
+    font-size: .88rem;
+  }
+  .ask-hint-label { font-weight: 700; opacity: .8; margin-right: .15rem; }
+  .ask-chip {
+    border: 1px solid rgba(255, 255, 255, .3);
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    padding: .42rem .8rem;
+    border-radius: 999px;
+    font-size: .86rem; font-weight: 600;
+    transition: background .15s var(--ease), border-color .15s var(--ease);
+  }
+  .ask-chip:hover { background: rgba(255, 255, 255, .26); border-color: #fff; }
+
+  .ask-inline .ask-chip, .ask-compact .ask-chip { border-color: var(--line); background: var(--surface-2); color: var(--ink-2); backdrop-filter: none; }
+  .ask-inline .ask-chip:hover, .ask-compact .ask-chip:hover { background: var(--cyan-50); border-color: var(--cyan); color: var(--navy); }
+  .ask-inline .ask-form { box-shadow: var(--shadow); border-color: var(--line); }
+
+  /* Compact — a quiet utility at the foot of a page, not a hero element. */
+  .ask-compact { max-width: 620px; }
+  .ask-compact .ask-form {
+    padding: .3rem .3rem .3rem .9rem;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--line);
+  }
+  .ask-compact .ask-icon svg { width: 19px; height: 19px; }
+  .ask-compact .ask-input { font-size: .96rem; padding-block: .55rem; }
+  .ask-compact .ask-go { min-height: 42px; padding: 0 1.05rem; font-size: .9rem; }
+  .ask-compact .ask-go svg { width: 16px; height: 16px; }
+  .ask-compact .ask-hint { margin-top: .6rem; font-size: .82rem; }
+  .ask-compact .ask-chip { padding: .32rem .65rem; font-size: .8rem; }
+  .ask-compact .ask-panel :global(.ap-body) { padding: 1.1rem 1.15rem 1.25rem; }
+  .ask-compact .ask-panel :global(.ap-title) { font-size: 1.12rem; }
+
+  /* ------------------------------------------------------------- panel */
+  .ask-panel {
+    margin-top: 1rem;
+    background: #fff;
+    color: var(--ink);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    text-align: left;
+    animation: askIn .28s var(--ease);
+  }
+  @keyframes askIn { from { opacity: 0; transform: translateY(-8px); } }
+
+  .ask-panel :global(.ap-head) {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .85rem 1.35rem;
+    background: var(--navy);
+    color: #cfe6f5;
+    font-size: .84rem; font-weight: 600;
+  }
+  .ask-panel :global(.ap-head svg) { width: 17px; height: 17px; color: var(--cyan); flex: none; }
+  .ask-panel :global(.ap-close) {
+    margin-left: auto; background: none; border: 0; color: #9fb0d0;
+    font-size: 1.5rem; line-height: 1; padding: 0 .2rem; border-radius: 6px;
+  }
+  .ask-panel :global(.ap-close:hover) { color: #fff; }
+
+  .ask-panel :global(.ap-body) { padding: 1.35rem 1.35rem 1.5rem; }
+  .ask-panel :global(.ap-title) {
+    font-family: var(--font-display); font-weight: 800; font-size: 1.28rem;
+    letter-spacing: -.02em; color: var(--navy); margin-bottom: .5rem; line-height: 1.2;
+  }
+  .ask-panel :global(.ap-answer) { color: var(--ink-2); line-height: 1.6; margin-bottom: 1.1rem; font-size: 1rem; }
+  .ask-panel :global(.ap-actions) { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .ask-panel :global(.ap-more) {
+    margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px solid var(--line-2);
+  }
+  .ask-panel :global(.ap-more-label) {
+    font-size: .76rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: .65rem;
+  }
+  .ask-panel :global(.ap-more ul) { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+  .ask-panel :global(.ap-more a) {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .5rem .65rem; margin-inline: -.65rem; border-radius: 9px;
+    color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: .95rem;
+  }
+  .ask-panel :global(.ap-more a:hover) { background: var(--cyan-50); color: var(--navy); }
+  .ask-panel :global(.ap-more a svg) { width: 14px; height: 14px; color: var(--cyan-600); flex: none; }
+  .ask-panel :global(.ap-note) {
+    padding: .8rem 1.35rem; background: var(--surface-2); border-top: 1px solid var(--line-2);
+    font-size: .82rem; color: var(--ink-3);
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const STOP = new Set(['a','an','the','i','my','me','you','your','we','our','is','are','do','does','did','can','could','would','will','for','of','in','on','at','to','and','or','with','need','want','get','have','has','how','what','where','when','who','much','some','someone','somebody','please','hi','hey','hello','looking','look','find','near','it','that','this','be','am','was','there','their','they','out','up','if','so','just','about','also','from','by']);
+
+    const norm = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    // Question words are stripped by `tokens`, but their presence tells us the
+    // visitor wants an answer rather than a page — so lean towards the FAQ.
+    const QWORDS = new Set(['how','what','when','why','who','where','can','could','do','does','did','is','are','should','will','would','must','any']);
+    const tokens = (s) => norm(s).split(' ').filter((t) => t.length > 2 && !STOP.has(t));
+
+    // Light stemming so "cleaning"/"cleaner"/"cleaned"/"clean" all match.
+    const stem = (t) =>
+      t.replace(/(ing|ers|er|ed|es|s)$/,'').replace(/^(wash|clean|scrub)\w*$/,'$1') || t;
+
+    document.querySelectorAll('[data-ask]').forEach((root) => {
+      const form  = root.querySelector('[data-ask-form]');
+      const input = root.querySelector('[data-ask-input]');
+      const panel = root.querySelector('[data-ask-panel]');
+      if (!form || !input || !panel) return;
+
+      let DATA = null;
+      let docs = null;
+      let loading = null;
+
+      // The index is a single cacheable JSON file shared by every page. We only
+      // fetch it once the visitor shows intent — focus, typing, or a chip click —
+      // so it never competes with the page's own render.
+      function load() {
+        if (loading) return loading;
+        loading = fetch('/ask-index.json')
+          .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+          .then((json) => { DATA = json; docs = build(json); })
+          .catch(() => { DATA = null; docs = null; });
+        return loading;
+      }
+
+      const build = (data) => data.entries.map((e) => {
+        const bag = new Map();
+        const add = (text, weight) => {
+          tokens(text).forEach((t) => {
+            const k = stem(t);
+            bag.set(k, (bag.get(k) || 0) + weight);
+          });
+        };
+        add(e.title, 3);
+        e.terms.forEach((t) => add(t, 4));
+        add(e.answer, 1);
+        // Each term kept whole (as stemmed tokens) so `detect` can ask "did the
+        // visitor say every word of this place or service name?"
+        const termSets = [e.title, ...e.terms].map((t) => tokens(t).map(stem));
+        return { entry: e, bag, termSets };
+      });
+
+      /**
+       * Work out whether the visitor actually named a service and/or a place,
+       * so we answer at the right altitude:
+       *   "solar panels are dusty"        -> the solar service page
+       *   "do you clean in Quail Creek"   -> the Green Valley area page
+       *   "windows cleaned in Green Valley" -> the service x location page
+       * Without this, a location-specific page can win a query that never
+       * mentioned a location, which reads as a non-sequitur.
+       */
+      function detect(qSet) {
+        let loc = null, svc = null, locScore = 0, svcScore = 0;
+        for (const { entry, termSets } of docs) {
+          for (const set of termSets) {
+            if (!set.length || !set.every((t) => qSet.has(t))) continue;
+            if (entry.kind === 'location' && set.length > locScore) { loc = entry.location; locScore = set.length; }
+            if (entry.kind === 'service'  && set.length > svcScore) { svc = entry.service;  svcScore = set.length; }
+          }
+        }
+        return { loc, svc };
+      }
+
+      function score(q) {
+        if (!docs) return [];
+        const qt = tokens(q).map(stem);
+        if (!qt.length) return [];
+        const uniq = [...new Set(qt)];
+        const qSet = new Set(uniq);
+        const { loc, svc } = detect(qSet);
+        const asksAQuestion = /\?/.test(q) || QWORDS.has(norm(q).split(' ')[0]);
+
+        return docs
+          .map(({ entry, bag }) => {
+            let s = 0;
+            let hits = 0;
+            for (const t of uniq) {
+              const exact = bag.get(t);
+              if (exact) { s += exact; hits++; continue; }
+              // partial: query token is a prefix of an indexed token or vice versa
+              for (const [k, w] of bag) {
+                if (k.length > 3 && (k.startsWith(t) || t.startsWith(k))) { s += w * 0.5; hits++; break; }
+              }
+            }
+            // Reward entries that matched most of what the visitor typed.
+            const coverage = hits / uniq.length;
+            s *= 0.45 + coverage;
+
+            if (entry.kind === 'combo') {
+              // Only the best answer when they named BOTH a service and a place.
+              s *= (loc && svc && entry.location === loc && entry.service === svc) ? 2.6 : 0.2;
+            } else if (entry.kind === 'location') {
+              if (loc && entry.location === loc) s *= svc ? 1.1 : 2.2;
+            } else if (entry.kind === 'service') {
+              if (svc && entry.service === svc) s *= loc ? 1.1 : (asksAQuestion ? 1.3 : 2.2);
+            } else if (entry.kind === 'faq' && asksAQuestion) {
+              s *= 1.8;
+            }
+            return { entry, s, coverage };
+          })
+          .filter((r) => r.s > 0 && r.coverage >= 0.34)
+          .sort((a, b) => b.s - a.s);
+      }
+
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+      const ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+      async function render(q) {
+        await load();
+        const results = score(q);
+        panel.hidden = false;
+
+        const head = `
+          <div class="ap-head">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 1 9 9c0 1.5-.4 3-1 4.2l1 4.3-4.4-1a9 9 0 1 1-4.6-16.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+            <span>Answering: &ldquo;${esc(q)}&rdquo;</span>
+            <button type="button" class="ap-close" data-ask-close aria-label="Close answer">&times;</button>
+          </div>`;
+
+        if (!results.length) {
+          panel.innerHTML = head + `
+            <div class="ap-body">
+              <p class="ap-title">Let&rsquo;s get you a straight answer.</p>
+              <p class="ap-answer">We could not match that to something on the site &mdash; but a person can answer it in about a minute. Call or text and we will tell you exactly what you need and what it costs.</p>
+              <div class="ap-actions">
+                <a class="btn btn-sm" href="/quote/">Get your free quote</a>
+                <a class="btn btn-sm btn-ghost" href="tel:${DATA?.phone || '+15204509500'}">Call ${DATA?.phoneLabel || '(520) 450-9500'}</a>
+              </div>
+            </div>`;
+          panel.querySelector('[data-ask-close]')?.addEventListener('click', close);
+          return;
+        }
+
+        const top = results[0].entry;
+        const rest = results.slice(1, 5).map((r) => r.entry);
+
+        const more = rest.length
+          ? `<div class="ap-more">
+               <p class="ap-more-label">Related</p>
+               <ul>${rest.map((e) => `<li><a href="${e.href}">${ARROW}${esc(e.title)}</a></li>`).join('')}</ul>
+             </div>`
+          : '';
+
+        panel.innerHTML = head + `
+          <div class="ap-body">
+            <p class="ap-title">${esc(top.title)}</p>
+            <p class="ap-answer">${esc(top.answer)}</p>
+            <div class="ap-actions">
+              <a class="btn btn-sm" href="/quote/${top.service ? `?service=${top.service}` : ''}${top.service && top.location ? `&area=${top.location}` : top.location ? `?area=${top.location}` : ''}">Get your free quote</a>
+              <a class="btn btn-sm btn-ghost" href="${top.href}">${esc(top.cta)}</a>
+            </div>
+            ${more}
+          </div>
+          <p class="ap-note">Answers come straight from this site &mdash; nothing here is guessed. Want a human? Call or text (520)&nbsp;450-9500.</p>`;
+
+        panel.querySelector('[data-ask-close]')?.addEventListener('click', close);
+      }
+
+      function close() {
+        panel.hidden = true;
+        panel.innerHTML = '';
+        input.focus();
+      }
+
+      // Warm the index the moment the visitor looks like they might use it.
+      input.addEventListener('focus', load, { once: true });
+      input.addEventListener('input', load, { once: true });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = input.value.trim();
+        if (!q) { input.focus(); return; }
+        render(q);
+      });
+
+      root.querySelectorAll('[data-ask-suggest]').forEach((chip) => {
+        chip.addEventListener('mouseenter', load, { once: true });
+        chip.addEventListener('click', async () => {
+          input.value = chip.getAttribute('data-ask-suggest') || '';
+          await render(input.value);
+          panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      });
+
+      input.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) close(); });
+    });
+  })();
+</script>

@@ -1,0 +1,9 @@
+{
+  "name": "Wildcat Washers",
+  "short_name": "Wildcat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#121832",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

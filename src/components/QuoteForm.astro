@@ -1,0 +1,171 @@
+---
+import { company, services, locations, cta } from '@/data/business';
+
+export interface Props {
+  /** Pre-selects a service when the form is dropped on a service page. */
+  service?: string;
+  /** Pre-selects an area when the form is dropped on a location page. */
+  area?: string;
+  compact?: boolean;
+  id?: string;
+}
+const { service, area, compact = false, id = 'quote-form' } = Astro.props;
+---
+
+<form
+  class:list={['qf', compact && 'qf-compact']}
+  id={id}
+  method="POST"
+  action="/thank-you/"
+  name="quote"
+  data-netlify="true"
+  netlify-honeypot="company-website"
+  data-quote-form
+>
+  {/* Netlify/most static hosts need the form name echoed as a hidden field. */}
+  <input type="hidden" name="form-name" value="quote" />
+  {/* Honeypot — real people never see or fill this. */}
+  <p class="qf-hp" aria-hidden="true">
+    <label>Leave this empty <input name="company-website" tabindex="-1" autocomplete="off" /></label>
+  </p>
+
+  <div class="qf-grid">
+    <div class="qf-field">
+      <label for={`${id}-name`}>Your name <span aria-hidden="true">*</span></label>
+      <input id={`${id}-name`} name="name" type="text" required autocomplete="name" placeholder="Jane Miller" />
+    </div>
+
+    <div class="qf-field">
+      <label for={`${id}-phone`}>Phone <span aria-hidden="true">*</span></label>
+      <input
+        id={`${id}-phone`}
+        name="phone"
+        type="tel"
+        required
+        autocomplete="tel"
+        inputmode="tel"
+        placeholder="(520) 555-0134"
+      />
+    </div>
+
+    <div class="qf-field">
+      <label for={`${id}-service`}>What do you need cleaned?</label>
+      <select id={`${id}-service`} name="service" data-qf-service>
+        <option value="">Choose a service…</option>
+        {services.map((s) => (
+          <option value={s.slug} selected={s.slug === service}>{s.name}</option>
+        ))}
+        <option value="multiple" selected={service === 'multiple'}>More than one of these</option>
+        <option value="not-sure" selected={service === 'not-sure'}>Not sure — help me decide</option>
+      </select>
+    </div>
+
+    <div class="qf-field">
+      <label for={`${id}-area`}>Where are you?</label>
+      <select id={`${id}-area`} name="area" data-qf-area>
+        <option value="">Choose your town…</option>
+        {locations.map((l) => (
+          <option value={l.slug} selected={l.slug === area}>{l.name}</option>
+        ))}
+        <option value="other" selected={area === 'other'}>Somewhere else nearby</option>
+      </select>
+    </div>
+
+    <div class="qf-field qf-full">
+      <label for={`${id}-email`}>Email <small>(optional — we’ll text or call otherwise)</small></label>
+      <input id={`${id}-email`} name="email" type="email" autocomplete="email" placeholder="jane@example.com" />
+    </div>
+
+    <div class="qf-field qf-full">
+      <label for={`${id}-details`}>Anything we should know? <small>(optional)</small></label>
+      <textarea
+        id={`${id}-details`}
+        name="details"
+        rows={compact ? 2 : 3}
+        placeholder="Single storey, about 20 windows, screens too. Sprinkler spotting on the front."
+      ></textarea>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-lg btn-block">{cta.primary}</button>
+
+  <p class="qf-note">
+    We’ll come back with a fixed price — usually the same day. No obligation, no sales visit,
+    and you don’t pay until the work is done and you’re happy.
+  </p>
+
+  <p class="qf-alt">
+    Rather just talk to someone? <a class="tel-link" href={`tel:${company.phoneRaw}`} data-track="call-form">{company.phone}</a>
+  </p>
+</form>
+
+<style>
+  .qf { display: grid; gap: 1.1rem; }
+  .qf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem 1rem; }
+  .qf-full { grid-column: 1 / -1; }
+  @media (max-width: 620px) { .qf-grid { grid-template-columns: 1fr; } }
+
+  .qf-field { display: grid; gap: .35rem; }
+  .qf-field label {
+    font-family: var(--font-display); font-weight: 700; font-size: .93rem;
+    color: var(--navy); letter-spacing: -.01em;
+  }
+  .qf-field label span { color: var(--red); }
+  .qf-field label small { font-family: var(--font-body); font-weight: 500; color: var(--ink-3); font-size: .84rem; }
+
+  .qf input, .qf select, .qf textarea {
+    width: 100%;
+    min-height: 54px;
+    padding: .75rem 1rem;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    font-size: 1.02rem;
+    color: var(--ink);
+    transition: border-color .16s var(--ease), box-shadow .16s var(--ease);
+  }
+  .qf textarea { min-height: 0; line-height: 1.5; resize: vertical; }
+  .qf input::placeholder, .qf textarea::placeholder { color: #9aa3bd; }
+  .qf input:focus, .qf select:focus, .qf textarea:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 4px rgba(54, 198, 244, .20);
+  }
+  .qf select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23626b8a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 18px;
+    padding-right: 2.8rem;
+  }
+  .qf input:user-invalid, .qf select:user-invalid { border-color: var(--red); }
+
+  .qf-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .qf-note { font-size: .9rem; color: var(--ink-3); line-height: 1.5; text-align: center; }
+  .qf-alt { font-size: .95rem; color: var(--ink-2); text-align: center; }
+  .qf-alt .tel-link { font-size: 1.05rem; }
+
+</style>
+
+<script is:inline>
+  // Carry ?service= / ?area= from a CTA link straight into the form, so a visitor
+  // who clicked "Solar panel cleaning in Marana" doesn't re-answer what we know.
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const service = params.get('service');
+    const area = params.get('area');
+    if (!service && !area) return;
+    document.querySelectorAll('[data-quote-form]').forEach((form) => {
+      if (service) {
+        const el = form.querySelector('[data-qf-service]');
+        if (el && [...el.options].some((o) => o.value === service)) el.value = service;
+      }
+      if (area) {
+        const el = form.querySelector('[data-qf-area]');
+        if (el && [...el.options].some((o) => o.value === area)) el.value = area;
+      }
+    });
+  })();
+</script>

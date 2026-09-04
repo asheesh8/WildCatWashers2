@@ -1,0 +1,22 @@
+---
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  align?: 'left' | 'center';
+  as?: 'h2' | 'h3';
+}
+const { eyebrow, title, lede, align = 'left', as: Tag = 'h2' } = Astro.props;
+---
+<div class:list={['sh', align === 'center' && 'center']}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Tag set:html={title} />
+  {lede && <p class="lede measure" set:html={lede} />}
+  <slot />
+</div>
+
+<style>
+  .sh { display: grid; gap: .85rem; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+  .sh.center { justify-items: center; text-align: center; }
+  .sh.center .measure { margin-inline: auto; }
+</style>

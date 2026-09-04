@@ -1,0 +1,83 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import AreaGrid from '@/components/AreaGrid.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import AskWildcat from '@/components/AskWildcat.astro';
+import { services, locations, alsoServing, proof, allAreaNames, company } from '@/data/business';
+---
+<Base
+  title="Service Areas | Window Cleaning Across Greater Tucson | Wildcat Washers"
+  description={`Window cleaning, solar panel cleaning and pressure washing in ${allAreaNames()} and surrounding communities. ${proof.customersServedLabel} customers served across Pima and Pinal County.`}
+  canonical="/areas/"
+  breadcrumbs={[{ name: 'Service Areas', href: '/areas/' }]}
+>
+  <section class="hub tone-navy">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Service Areas</span></nav>
+      <h1>Eight towns. <span class="swipe">One crew.</span></h1>
+      <p class="lede">
+        We run a weekly route through {allAreaNames()} — which is why we can usually get to
+        you this week rather than next month.
+      </p>
+      <div class="hub-ask"><AskWildcat variant="hero" placeholder="Try “do you serve Quail Creek?”" /></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Pick your town" title="Where we work." />
+      <AreaGrid />
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="Every combination" title="Service by town." />
+      <div class="matrix">
+        {locations.map((l) => (
+          <div>
+            <h3><a href={`/areas/${l.slug}/`}>{l.name}</a></h3>
+            <ul>
+              {services.map((s) => (
+                <li><a href={`/services/${s.slug}/${l.slug}/`}>{s.name}</a></li>
+              ))}
+            </ul>
+            <p>{l.communities.slice(0, 4).join(' · ')}</p>
+          </div>
+        ))}
+      </div>
+      <p class="also">
+        We also serve {alsoServing.join(', ')} and surrounding communities across Pima and Pinal
+        County. Not sure whether you are in range? Call or text {company.phone} — the answer is
+        usually yes.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .hub { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .hub h1 { font-size: var(--step-4); color: #fff; margin-block: .6rem .8rem; text-transform: none; }
+  .hub h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .hub .lede { max-width: 62ch; margin-bottom: 1.75rem; }
+  .hub-ask { max-width: 680px; }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+
+  .matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1.25rem, 2.5vw, 2rem); }
+  @media (max-width: 1000px) { .matrix { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .matrix { grid-template-columns: 1fr; } }
+  .matrix > div { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.25rem; }
+  .matrix h3 { font-size: 1.1rem; margin-bottom: .7rem; }
+  .matrix h3 a { color: var(--navy); text-decoration: none; }
+  .matrix h3 a:hover { color: var(--cyan-600); }
+  .matrix ul { list-style: none; margin: 0 0 .9rem; padding: 0; display: grid; gap: .35rem; }
+  .matrix ul a { font-size: .92rem; color: var(--ink-2); text-decoration: none; font-weight: 600; }
+  .matrix ul a:hover { color: var(--cyan-600); }
+  .matrix p { font-size: .82rem; color: var(--ink-3); line-height: 1.4; padding-top: .8rem; border-top: 1px solid var(--line-2); }
+  .also { margin-top: 2rem; color: var(--ink-3); font-size: .96rem; max-width: 80ch; line-height: 1.6; }
+</style>

@@ -1,0 +1,127 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import Reviews from '@/components/Reviews.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { proof, awards, company, services } from '@/data/business';
+import { displayReviews, publishedReviews } from '@/data/reviews';
+import { img, altFor } from '@/data/media';
+
+/* AggregateRating is only emitted once real reviews exist — publishing a rating
+   for reviews that are not on the page would be a structured-data violation. */
+const schema = publishedReviews.length
+  ? [{
+      '@type': 'Product',
+      name: `${company.name} window cleaning`,
+      brand: { '@id': `${company.url}/#business` },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '5',
+        bestRating: '5',
+        reviewCount: publishedReviews.length,
+      },
+      review: publishedReviews.map((r) => ({
+        '@type': 'Review',
+        reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+        author: { '@type': 'Person', name: r.name },
+        reviewBody: r.text,
+      })),
+    }]
+  : [];
+---
+<Base
+  title="Reviews | Never a Review Below 5 Stars | Wildcat Washers Tucson"
+  description={`${proof.customersServedLabel} customers across Greater Tucson and not one public review below five stars. Read what homeowners in Green Valley, Oro Valley, Marana and Tucson say about Wildcat Washers.`}
+  canonical="/reviews/"
+  schema={schema}
+  breadcrumbs={[{ name: 'Reviews', href: '/reviews/' }]}
+>
+  <section class="hub tone-navy">
+    <div class="wrap hub-in">
+      <div>
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Reviews</span></nav>
+        <h1>Never a review <span class="swipe">below five stars</span>.</h1>
+        <p class="lede">
+          That is not marketing language, it is the literal record across
+          {' '}{proof.customersServedLabel} customers — Google, Nextdoor, BBB, Angi and Thumbtack.
+          It is also why the tagline says what it says.
+        </p>
+        <div class="hub-stats">
+          <div><strong>{proof.customersServedLabel}</strong><span>customers served</span></div>
+          <div><strong>5.0</strong><span>average rating</span></div>
+          <div><strong>0</strong><span>reviews below 5 stars</span></div>
+        </div>
+      </div>
+      <figure class="hub-fig">
+        <Image src={img('award-az19-winner-2025')} alt={altFor('award-az19-winner-2025')} widths={[400, 740]} sizes="(max-width: 940px) 92vw, 40vw" loading="eager" quality={76} class="cover" />
+        <figcaption>2025 AZ-19 Readers’ Pick — Best Window Cleaner.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="In their words" title="What customers say." />
+      <Reviews items={displayReviews} limit={24} />
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="Recognition" title="Awards other people voted on." lede="Adjectives are free. These were not." />
+      <div class="aw">
+        {awards.map((a) => (
+          <article>
+            {a.badge && <img src={a.badge} alt={`${a.issuer} — ${a.name}`} width="120" height="120" loading="lazy" />}
+            <h3>{a.name}</h3>
+            <p>{a.issuer}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="By service" title="Reviews for each service." />
+      <ul class="svc-links">
+        {services.map((s) => (
+          <li><a href={`/services/${s.slug}/`}>{s.name}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand title="Join a thousand people who’d recommend us." />
+</Base>
+
+<style>
+  .hub { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .hub-in { display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 940px) { .hub-in { grid-template-columns: 1fr; } }
+  .hub h1 { font-size: var(--step-4); color: #fff; margin-block: .6rem .8rem; text-transform: none; }
+  .hub h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .hub .lede { max-width: 58ch; }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+  .hub-stats { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin-top: 2rem; padding-top: 1.75rem; border-top: 1px solid rgba(255,255,255,.14); }
+  .hub-stats strong { display: block; font-family: var(--font-display); font-weight: 900; font-size: 2.4rem; line-height: 1; color: #fff; letter-spacing: -.04em; }
+  .hub-stats span { font-size: .9rem; color: #9aa6c4; }
+  .hub-fig { margin: 0; }
+  .hub-fig :global(img) { width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; }
+  .hub-fig figcaption { margin-top: .7rem; font-size: .88rem; color: #9aa6c4; }
+
+  .aw { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+  @media (max-width: 1000px) { .aw { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .aw { grid-template-columns: 1fr; } }
+  .aw article { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.4rem; display: grid; gap: .4rem; justify-items: center; text-align: center; align-content: start; }
+  .aw img { height: 74px; width: auto; object-fit: contain; margin-bottom: .5rem; }
+  .aw h3 { font-size: 1rem; line-height: 1.25; }
+  .aw p { font-size: .84rem; color: var(--ink-3); line-height: 1.45; }
+
+  .svc-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .6rem; }
+  .svc-links a { display: inline-block; padding: .8rem 1.3rem; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--font-display); font-weight: 700; color: var(--navy); text-decoration: none; }
+  .svc-links a:hover { border-color: var(--cyan); background: var(--cyan-50); }
+</style>

@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets';
+import { locations, alsoServing } from '@/data/business';
+import { img, altFor } from '@/data/media';
+export interface Props { exclude?: string; compact?: boolean; }
+const { exclude, compact = false } = Astro.props;
+const list = locations.filter((l) => l.slug !== exclude);
+---
+<ul class:list={['ag', compact && 'ag-compact']}>
+  {list.map((l, i) => (
+    <li class="ag-item reveal" style={`transition-delay:${(i % 4) * 55}ms`}>
+      <a href={`/areas/${l.slug}/`}>
+        <div class="ag-media">
+          <Image src={img(l.image)} alt={altFor(l.image)} widths={[300, 520, 760]} sizes="(max-width: 700px) 45vw, 24vw" quality={72} class="cover" />
+        </div>
+        <div class="ag-body">
+          <h3>{l.name}</h3>
+          {!compact && <p>{l.communities.slice(0, 3).join(' · ')}</p>}
+          <span class="ag-go" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+      </a>
+    </li>
+  ))}
+</ul>
+<p class="ag-also">
+  Also serving {alsoServing.join(', ')} and surrounding communities across Pima and Pinal County.
+  Not sure if you’re in range? <a href="/contact/">Ask us</a> — the answer is usually yes.
+</p>
+
+<style>
+  .ag { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(.8rem, 1.8vw, 1.35rem); }
+  @media (max-width: 980px) { .ag { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .ag { grid-template-columns: repeat(2, 1fr); } }
+
+  .ag-item a {
+    display: block; height: 100%;
+    border-radius: var(--radius-lg); overflow: hidden;
+    background: #fff; border: 1px solid var(--line);
+    text-decoration: none; color: inherit;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease);
+  }
+  .ag-item a:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--cyan); }
+  .ag-media { aspect-ratio: 16/10; overflow: hidden; background: var(--surface-3); }
+  .ag-media :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform .55s var(--ease); }
+  .ag-item a:hover .ag-media :global(img) { transform: scale(1.06); }
+  .ag-body { padding: .95rem 1.05rem 1.1rem; display: grid; gap: .3rem; position: relative; }
+  .ag-body h3 { font-size: 1.08rem; padding-right: 1.6rem; }
+  .ag-body p { font-size: .84rem; color: var(--ink-3); line-height: 1.4; }
+  .ag-go { position: absolute; top: 1rem; right: 1rem; color: var(--red); }
+  .ag-go svg { width: 17px; height: 17px; transition: transform .22s var(--ease); }
+  .ag-item a:hover .ag-go svg { transform: translateX(3px); }
+  .ag-also { margin-top: 1.75rem; color: var(--ink-3); font-size: .95rem; max-width: 78ch; }
+</style>

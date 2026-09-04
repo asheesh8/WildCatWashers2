@@ -1,0 +1,110 @@
+---
+import { company, nav, guarantees, awards, allAreaNames, alsoServing } from '@/data/business';
+const year = new Date().getFullYear();
+---
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-top">
+      <div class="ftr-brand">
+        <img src="/brand/logo-long-outline.svg" alt={`${company.name}`} width="260" height="105" loading="lazy" />
+        <p class="ftr-tag">{company.tagline}</p>
+        <p class="ftr-blurb">
+          Professional window cleaning, solar panel cleaning and pressure washing for homes and
+          businesses across {company.region}. Licensed, insured, and {company.customersLabel ?? '1,000+'} customers deep.
+        </p>
+        <div class="ftr-contact">
+          <a class="ftr-phone" href={`tel:${company.phoneRaw}`} data-track="call-footer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {company.phone}
+          </a>
+          <a class="ftr-mail" href={`mailto:${company.email}`}>{company.email}</a>
+          <p class="ftr-hours">{company.hoursHuman}</p>
+        </div>
+      </div>
+
+      {nav.footer.map((col) => (
+        <nav class="ftr-col" aria-label={col.title}>
+          <h3>{col.title}</h3>
+          <ul>
+            {col.links.map((l) => (<li><a href={l.href}>{l.label}</a></li>))}
+          </ul>
+        </nav>
+      ))}
+    </div>
+
+    <div class="ftr-guarantee">
+      {guarantees.map((g) => (
+        <div class="fg-item">
+          <span class="fg-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="m8.6 12 2.3 2.3 4.5-4.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div><strong>{g.name}</strong><span>{g.headline}</span></div>
+        </div>
+      ))}
+      <a class="btn btn-sm fg-link" href="/guarantee/">How our guarantees work</a>
+    </div>
+
+    <div class="ftr-areas">
+      <h3>Where we work</h3>
+      <p>
+        {allAreaNames()} — plus {alsoServing.join(', ')} and surrounding communities across
+        Pima and Pinal County.
+      </p>
+    </div>
+
+    <div class="ftr-bottom">
+      <p>&copy; {year} {company.legalName}. All rights reserved. Licensed &amp; insured.</p>
+      <ul class="ftr-legal">
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/sitemap-index.xml">Sitemap</a></li>
+      </ul>
+      <p class="ftr-awards">{awards.map((a) => a.short).join(' · ')}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr { background: var(--navy); color: #a9b4d1; padding-block: clamp(3rem, 6vw, 4.5rem) 2rem; font-size: .97rem; }
+  .ftr h3 { color: #fff; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1rem; font-weight: 700; }
+  .ftr a:not(.btn) { color: #c3cde6; text-decoration: none; }
+  .ftr a:not(.btn):hover { color: var(--cyan); }
+
+  .ftr-top { display: grid; gap: 2.5rem; grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+  @media (max-width: 980px) { .ftr-top { grid-template-columns: 1fr 1fr; } .ftr-brand { grid-column: 1 / -1; } }
+  @media (max-width: 560px) { .ftr-top { grid-template-columns: 1fr; } }
+
+  .ftr-brand img { width: 230px; height: auto; margin-bottom: 1rem; }
+  .ftr-tag { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--cyan); letter-spacing: -.02em; margin-bottom: .6rem; }
+  .ftr-blurb { max-width: 42ch; line-height: 1.6; margin-bottom: 1.3rem; }
+  .ftr-contact { display: grid; gap: .35rem; }
+  .ftr-phone { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: #fff !important; letter-spacing: -.02em; }
+  .ftr-phone:hover { color: var(--cyan) !important; }
+  .ftr-phone svg { width: 19px; height: 19px; color: var(--cyan); }
+  .ftr-hours { color: #939dba; font-size: .9rem; }
+
+  .ftr-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+
+  .ftr-guarantee {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem 2.5rem;
+    margin-top: 3rem; padding: 1.6rem 1.8rem;
+    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.10); border-radius: var(--radius-lg);
+  }
+  .fg-item { display: flex; align-items: center; gap: .9rem; flex: 1 1 280px; }
+  .fg-icon { flex: none; width: 42px; height: 42px; border-radius: 12px; background: rgba(54,198,244,.14); color: var(--cyan); display: grid; place-items: center; }
+  .fg-icon svg { width: 22px; height: 22px; }
+  .fg-item strong { display: block; color: #fff; font-family: var(--font-display); font-size: 1rem; }
+  .fg-item span { font-size: .9rem; line-height: 1.45; display: block; }
+  .fg-link { flex: none; }
+
+  .ftr-areas { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.10); }
+  .ftr-areas p { max-width: 90ch; line-height: 1.6; }
+
+  .ftr-bottom {
+    margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.10);
+    display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 2rem;
+    font-size: .87rem; color: #939dba;
+  }
+  .ftr-legal { list-style: none; display: flex; gap: 1.2rem; margin: 0; padding: 0; }
+  .ftr-awards { flex-basis: 100%; color: #8892b0; font-size: .82rem; }
+</style>

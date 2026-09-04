@@ -1,0 +1,324 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import FaqAccordion from '@/components/FaqAccordion.astro';
+import Reviews from '@/components/Reviews.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import QuoteForm from '@/components/QuoteForm.astro';
+import { services, locations, faqById, company, proof, guarantees } from '@/data/business';
+import { reviewsFor } from '@/data/reviews';
+import { img, altFor, pools, pickFrom } from '@/data/media';
+
+export function getStaticPaths() {
+  return services.flatMap((service) =>
+    locations.map((location) => ({
+      params: { service: service.slug, location: location.slug },
+      props: { service, location },
+    }))
+  );
+}
+
+const { service: s, location: l } = Astro.props;
+
+/* A distinct photo per service×location so no two pages look identical. */
+const pool =
+  s.slug === 'solar-panel-cleaning' ? pools.solar
+  : s.slug === 'pressure-washing' ? pools.pressure
+  : pools.windowAction;
+const heroKey = pickFrom(pool, `${s.slug}-${l.slug}`);
+
+/* The second photo must match the service too — a clean window is not proof of
+   a clean solar array. Seeded differently so it never repeats the hero. */
+const resultPool =
+  s.slug === 'solar-panel-cleaning' ? pools.solar
+  : s.slug === 'pressure-washing' ? pools.pressure
+  : pools.windowResult;
+const resultKey = (() => {
+  const first = pickFrom(resultPool, `${l.slug}-${s.slug}`);
+  if (first !== heroKey) return first;
+  const i = resultPool.indexOf(first);
+  return resultPool[(i + 1) % resultPool.length];
+})();
+
+const localFaqs = [
+  {
+    id: `areas-${l.slug}`,
+    q: `Do you do ${s.name.toLowerCase()} in ${l.name}?`,
+    a: `Yes. ${l.name} is one of our eight regular service areas and we are there most weeks, including ${l.communities.slice(0, 3).join(', ')}. Because we run a route rather than one-off trips, we can usually fit a ${l.name} address in within the same week.`,
+    topics: ['areas'],
+  },
+  {
+    id: `schedule-${l.slug}`,
+    q: `How soon can you get to ${l.name}?`,
+    a: `Most ${l.name} quotes go out the same day and most jobs are scheduled inside a week. Autumn and spring are the busiest stretches in the retirement communities, so booking a week or two ahead is worth it around then.`,
+    topics: ['process'],
+  },
+  ...s.faqIds.slice(0, 3).map((id) => faqById[id]).filter(Boolean),
+];
+
+const localReviews = reviewsFor(s.slug, l.name);
+const otherServicesHere = services.filter((x) => x.slug !== s.slug);
+const nearby = locations.filter((x) => x.slug !== l.slug).slice(0, 4);
+
+const title = `${s.name} in ${l.name}, AZ | Wildcat Washers`;
+const description = `${s.name} in ${l.name} — ${l.communities.slice(0, 3).join(', ')} and surrounding communities. ${proof.customersServedLabel} customers, never a review below 5 stars. Free same-day quote, and you don't pay until you're happy.`;
+
+const schema = [
+  {
+    '@type': 'Service',
+    name: `${s.name} in ${l.name}, AZ`,
+    serviceType: s.keywords.primary,
+    description,
+    provider: { '@id': `${company.url}/#business` },
+    areaServed: {
+      '@type': 'City',
+      name: l.fullName,
+      containedInPlace: { '@type': 'AdministrativeArea', name: 'Pima County, Arizona' },
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: localFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+];
+---
+
+<Base
+  title={title}
+  description={description}
+  canonical={`/services/${s.slug}/${l.slug}/`}
+  schema={schema}
+  breadcrumbs={[
+    { name: 'Services', href: '/services/' },
+    { name: s.name, href: `/services/${s.slug}/` },
+    { name: l.name, href: `/services/${s.slug}/${l.slug}/` },
+  ]}
+>
+  <!-- ---------------------------------------------------------------- hero -->
+  <section class="lhero">
+    <div class="wrap lhero-in">
+      <div class="lhero-text">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a> <span aria-hidden="true">/</span>
+          <a href="/services/">Services</a> <span aria-hidden="true">/</span>
+          <a href={`/services/${s.slug}/`}>{s.name}</a> <span aria-hidden="true">/</span>
+          <span aria-current="page">{l.name}</span>
+        </nav>
+        <h1>{s.name} in <span class="swipe">{l.name}</span>, AZ</h1>
+        <p class="lhero-blurb">{l.blurb}</p>
+        <p class="lhero-sum">{s.summary}</p>
+        <div class="lhero-cta">
+          <a class="btn btn-lg" href={`/quote/?service=${s.slug}&area=${l.slug}`}>Get your free quote</a>
+          <a class="btn btn-lg btn-ghost" href={`tel:${company.phoneRaw}`}>Call {company.phone}</a>
+        </div>
+        <ul class="lhero-proof">
+          <li><strong>{proof.customersServedLabel}</strong> customers served</li>
+          <li><strong>5.0</strong> stars, never lower</li>
+          <li><strong>14-day</strong> Spotless Guarantee</li>
+        </ul>
+      </div>
+      <figure class="lhero-fig">
+        <Image src={img(heroKey)} alt={altFor(heroKey)} widths={[420, 780, 1040]} sizes="(max-width: 940px) 92vw, 44vw" loading="eager" fetchpriority="high" quality={76} class="cover" />
+      </figure>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- local notes -->
+  <section class="section tone-soft">
+    <div class="wrap two">
+      <div>
+        <SectionHead
+          eyebrow={`${l.name} specifics`}
+          title={`What ${l.name} does to your ${s.shortName}.`}
+          lede={`Every town in this valley has its own version of the same problem. Here is what we see in ${l.name}.`}
+        />
+        <ul class="notes">
+          {l.localNotes.map((n, i) => (
+            <li><span>{String(i + 1).padStart(2, '0')}</span><p>{n}</p></li>
+          ))}
+        </ul>
+      </div>
+      <div class="comm">
+        <h3>Communities we work in</h3>
+        <ul class="comm-list">
+          {l.communities.map((c) => <li>{c}</li>)}
+        </ul>
+        <p class="comm-note">
+          Plus the surrounding {l.name} neighbourhoods. If your community is not listed, it almost
+          certainly still falls inside our route — <a href="/contact/">just ask</a>.
+        </p>
+        <dl class="comm-meta">
+          <div><dt>ZIP codes</dt><dd>{l.zips.join(', ')}</dd></div>
+          <div><dt>Typical lead time</dt><dd>Within the week</dd></div>
+          <div><dt>Quote turnaround</dt><dd>Usually same day</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ included -->
+  <section class="section">
+    <div class="wrap two two-tight">
+      <div>
+        <SectionHead eyebrow="What you get" title={`Every ${l.name} job includes:`} />
+        <ul class="ticks">{s.included.map((x) => <li>{x}</li>)}</ul>
+        <p class="also-note">
+          Add-ons available: {s.addOns.join(' · ')}.
+        </p>
+        <a class="btn" href={`/quote/?service=${s.slug}&area=${l.slug}`}>Get a fixed price for your {l.name} home</a>
+      </div>
+      <figure class="res-fig">
+        <Image src={img(resultKey)} alt={altFor(resultKey)} widths={[400, 720, 950]} sizes="(max-width: 900px) 92vw, 42vw" quality={76} class="cover" />
+        <figcaption>Real {s.name.toLowerCase()} work from our Greater Tucson route.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ pricing -->
+  <section class="section tone-navy">
+    <div class="wrap two">
+      <div>
+        <SectionHead
+          eyebrow="Pricing"
+          title={`What a ${l.name} job costs.`}
+          lede="Priced per job, never per hour, and always agreed before we book. These are the factors that move the number:"
+        />
+        <ul class="ticks">{s.pricingFactors.map((x) => <li>{x}</li>)}</ul>
+      </div>
+      <div class="guar">
+        {guarantees.map((g) => (
+          <article><h3>{g.name}</h3><p>{g.headline}</p></article>
+        ))}
+        <p class="guar-note">
+          Veteran and senior discounts apply in {l.name}, and your first service is 10% off.
+          Booking the same day as a neighbour brings both prices down.
+        </p>
+        <a class="btn btn-block" href={`/quote/?service=${s.slug}&area=${l.slug}`}>Get your free quote</a>
+      </div>
+    </div>
+  </section>
+
+  {localReviews.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <SectionHead eyebrow="Local reviews" title={`From ${l.name} customers.`} />
+        <Reviews items={localReviews} limit={3} />
+      </div>
+    </section>
+  )}
+
+  <!-- ----------------------------------------------------------------- faq -->
+  <section class="section tone-soft">
+    <div class="wrap faq-wrap">
+      <SectionHead eyebrow="Questions" title={`${s.name} in ${l.name} — the common questions.`} />
+      <FaqAccordion items={localFaqs} />
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------- internal -->
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Keep going" title={`More in ${l.name}, and nearby.`} />
+      <div class="links">
+        <div>
+          <h3>Other services in {l.name}</h3>
+          <ul>
+            {otherServicesHere.map((o) => (
+              <li><a href={`/services/${o.slug}/${l.slug}/`}>{o.name} in {l.name}</a></li>
+            ))}
+            <li><a href={`/areas/${l.slug}/`}>Everything we do in {l.name}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>{s.name} nearby</h3>
+          <ul>
+            {nearby.map((n) => (
+              <li><a href={`/services/${s.slug}/${n.slug}/`}>{s.name} in {n.name}</a></li>
+            ))}
+            <li><a href={`/services/${s.slug}/`}>{s.name} across Greater Tucson</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    service={s.slug}
+    area={l.slug}
+    title={`Book ${s.name.toLowerCase()} in ${l.name}.`}
+    lede={`Tell us your ${l.name} address and roughly what you need. You get a fixed price, usually the same day — and you don't pay until the work is done and you're happy with it.`}
+  />
+
+  <section class="section">
+    <div class="wrap-narrow">
+      <SectionHead align="center" eyebrow="Free quote" title={`${s.name} in ${l.name}`} />
+      <QuoteForm service={s.slug} area={l.slug} id={`q-${s.slug}-${l.slug}`} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lhero { padding-block: clamp(2rem, 5vw, 3.5rem) clamp(2.5rem, 5vw, 4rem); }
+  .lhero-in { display: grid; grid-template-columns: 1.08fr .92fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 940px) { .lhero-in { grid-template-columns: 1fr; } }
+  .lhero h1 { font-size: var(--step-4); margin-block: .55rem .7rem; text-transform: none; }
+  .lhero-blurb { font-size: var(--step-1); line-height: 1.45; color: var(--ink-2); margin-bottom: .9rem; }
+  .lhero-sum { color: var(--ink-2); line-height: 1.6; max-width: 60ch; margin-bottom: 1.6rem; font-size: 1rem; }
+  .lhero-cta { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1.5rem; }
+  @media (max-width: 640px) { .lhero-cta .btn { flex: 1 1 100%; } }
+  .lhero-proof { list-style: none; margin: 0; padding: 1.1rem 0 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: .5rem 1.8rem; font-size: .92rem; color: var(--ink-3); }
+  .lhero-proof strong { font-family: var(--font-display); font-weight: 900; color: var(--navy); font-size: 1.02rem; }
+  .lhero-fig { margin: 0; }
+  .lhero-fig :global(img) { width: 100%; border-radius: var(--radius-xl); aspect-ratio: 4/3; object-fit: cover; box-shadow: var(--shadow-lg); }
+
+  .crumbs { font-size: .85rem; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: .4rem; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--cyan-600); }
+  .crumbs span[aria-current] { color: var(--navy); font-weight: 600; }
+
+  .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  .two-tight { align-items: center; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+
+  .notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+  .notes li { display: grid; grid-template-columns: 40px 1fr; gap: 1rem; align-items: start; }
+  .notes span {
+    width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--navy); color: #fff; font-family: var(--font-display); font-weight: 900; font-size: .85rem;
+  }
+  .notes p { color: var(--ink-2); line-height: 1.6; font-size: .99rem; }
+
+  .comm { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(1.4rem, 3vw, 1.9rem); }
+  .comm h3 { font-size: 1.15rem; margin-bottom: .9rem; }
+  .comm-list { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+  .comm-list li { padding: .35rem .8rem; border-radius: 999px; background: var(--cyan-50); border: 1px solid var(--cyan-100); font-size: .88rem; font-weight: 600; color: var(--navy-600); }
+  .comm-note { font-size: .93rem; color: var(--ink-3); line-height: 1.55; }
+  .comm-meta { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--line-2); display: grid; gap: .7rem; }
+  .comm-meta div { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+  .comm-meta dt { font-size: .84rem; color: var(--ink-3); }
+  .comm-meta dd { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: .93rem; color: var(--navy); text-align: right; }
+
+  .also-note { margin: 1.25rem 0; font-size: .93rem; color: var(--ink-3); line-height: 1.55; }
+  .res-fig { margin: 0; }
+  .res-fig :global(img) { width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; box-shadow: var(--shadow); }
+  .res-fig figcaption { margin-top: .7rem; font-size: .88rem; color: var(--ink-3); }
+
+  .guar { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.13); border-radius: var(--radius-lg); padding: clamp(1.4rem, 3vw, 1.9rem); display: grid; gap: 1.1rem; }
+  .guar h3 { font-size: 1.08rem; color: var(--cyan); }
+  .guar article p { color: #cbd5ea; font-size: .95rem; line-height: 1.5; margin-top: .25rem; }
+  .guar-note { color: #9aa6c4; font-size: .9rem; line-height: 1.55; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.12); }
+
+  .faq-wrap { max-width: 900px; }
+
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3rem); }
+  @media (max-width: 700px) { .links { grid-template-columns: 1fr; } }
+  .links h3 { font-size: 1.1rem; margin-bottom: .8rem; }
+  .links ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .links a { display: block; padding: .7rem .9rem; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: .96rem; }
+  .links a:hover { background: var(--cyan-50); border-color: var(--cyan); color: var(--navy); }
+</style>

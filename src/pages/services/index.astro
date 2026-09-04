@@ -1,0 +1,81 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCards from '@/components/ServiceCards.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import AreaGrid from '@/components/AreaGrid.astro';
+import { services, locations, proof, allAreaNames } from '@/data/business';
+---
+<Base
+  title="Our Services | Window, Solar Panel & Pressure Washing | Wildcat Washers Tucson"
+  description={`Window cleaning, solar panel cleaning and pressure washing across Greater Tucson. ${proof.customersServedLabel} customers, never a review below 5 stars. Free same-day quotes.`}
+  canonical="/services/"
+  breadcrumbs={[{ name: 'Services', href: '/services/' }]}
+>
+  <section class="hub tone-navy">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Services</span></nav>
+      <h1>Three services. <span class="swipe">One standard.</span></h1>
+      <p class="lede">
+        Windows, solar panels and exterior surfaces. Same crew, same guarantees, same
+        walk-the-property-before-you-pay arrangement behind all three.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap"><ServiceCards /></div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="How it works" title="The same seven steps, whichever you book." />
+      <div class="proc"><ProcessSteps /></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="By town" title="Pick your area." lede={`We run a weekly route through ${allAreaNames()}.`} />
+      <AreaGrid />
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="Every combination" title="Service by town." lede="Each of these has local pricing factors, nearby communities and scheduling for that town." />
+      <div class="matrix">
+        {services.map((s) => (
+          <div>
+            <h3>{s.name}</h3>
+            <ul>
+              {locations.map((l) => (
+                <li><a href={`/services/${s.slug}/${l.slug}/`}>{s.name} in {l.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .hub { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .hub h1 { font-size: var(--step-4); color: #fff; margin-block: .6rem .8rem; text-transform: none; }
+  .hub h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .hub .lede { max-width: 62ch; }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+  .proc { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: .5rem clamp(1.25rem, 3vw, 2.25rem); }
+  .matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 2.5rem); }
+  @media (max-width: 860px) { .matrix { grid-template-columns: 1fr; } }
+  .matrix h3 { font-size: 1.15rem; margin-bottom: .8rem; }
+  .matrix ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+  .matrix a { display: block; padding: .6rem .85rem; border-radius: 9px; background: #fff; border: 1px solid var(--line); color: var(--ink-2); text-decoration: none; font-size: .94rem; font-weight: 600; }
+  .matrix a:hover { border-color: var(--cyan); color: var(--navy); background: var(--cyan-50); }
+</style>

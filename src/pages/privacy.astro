@@ -1,0 +1,73 @@
+---
+import Base from '@/layouts/Base.astro';
+import { company } from '@/data/business';
+---
+<Base
+  title="Privacy Policy | Wildcat Washers"
+  description="How Wildcat Washers collects, uses and protects the information you give us."
+  canonical="/privacy/"
+>
+  <section class="section">
+    <div class="wrap-narrow prose">
+      <h1>Privacy Policy</h1>
+      <p class="note">
+        <strong>Draft — needs legal review before launch.</strong> This is a plain-language
+        starting point written to match how the site actually behaves. Have it checked against
+        your obligations before you publish it.
+      </p>
+
+      <h2>What we collect</h2>
+      <p>
+        When you request a quote we collect the name, phone number, email address, service and
+        area you give us, plus anything you type into the message field. That is all we ask for
+        and all we store.
+      </p>
+
+      <h2>Why we collect it</h2>
+      <p>
+        To give you a price, schedule your service and contact you about it. We do not sell,
+        rent or trade your information to anyone.
+      </p>
+
+      <h2>Analytics</h2>
+      <p>
+        We use standard website analytics to understand which pages people find useful. This
+        collects anonymised usage data — pages viewed, roughly where visitors are, what device
+        they used. It is not tied to your name or contact details.
+      </p>
+
+      <h2>How long we keep it</h2>
+      <p>
+        Quote requests and customer records are kept for as long as we are doing business
+        together, plus the period required for tax and accounting records.
+      </p>
+
+      <h2>Your choices</h2>
+      <p>
+        You can ask us to correct or delete your information at any time. Call or email
+        <a href={`tel:${company.phoneRaw}`}>{company.phone}</a> or
+        <a href={`mailto:${company.email}`}>{company.email}</a> and we will handle it.
+      </p>
+
+      <h2>Text messages</h2>
+      <p>
+        If you give us a mobile number we may text you about your quote or appointment. Reply
+        STOP at any time and we will stop.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy: <a href={`mailto:${company.email}`}>{company.email}</a> or
+        <a href={`tel:${company.phoneRaw}`}>{company.phone}</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose { display: grid; gap: 1rem; }
+  .prose h1 { font-size: var(--step-3); text-transform: none; margin-bottom: .5rem; }
+  .prose h2 { font-size: var(--step-1); margin-top: 1.5rem; }
+  .prose p { color: var(--ink-2); line-height: 1.7; }
+  .note { background: #fff8e6; border: 1px solid #f0d489; border-left: 5px solid #e0a800; border-radius: 12px; padding: 1rem 1.2rem; color: #6b5200 !important; }
+</style>

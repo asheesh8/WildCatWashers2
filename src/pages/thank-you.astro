@@ -1,0 +1,57 @@
+---
+import Base from '@/layouts/Base.astro';
+import { company, process, guarantees } from '@/data/business';
+---
+<Base
+  title="Thanks — we've got it | Wildcat Washers"
+  description="Your quote request has been received. We'll come back with a fixed price, usually the same day."
+  canonical="/thank-you/"
+  noindex={true}
+>
+  <section class="ty">
+    <div class="wrap-narrow ty-in">
+      <span class="ty-tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <h1>Got it. Thank you.</h1>
+      <p class="lede">
+        Your request is in. We will come back with a fixed price — usually the same day, and
+        always within one business day.
+      </p>
+      <div class="ty-next">
+        <h2>What happens now</h2>
+        <ol>
+          {process.slice(1, 5).map((p) => (
+            <li><strong>{p.name}</strong><span>{p.body}</span></li>
+          ))}
+        </ol>
+      </div>
+      <div class="ty-guar">
+        {guarantees.map((g) => <p><strong>{g.name}</strong> — {g.headline}</p>)}
+      </div>
+      <p class="ty-call">
+        Need it sooner, or want to add something? Call or text
+        <a class="tel-link" href={`tel:${company.phoneRaw}`}>{company.phone}</a>.
+      </p>
+      <a class="btn btn-ghost" href="/">Back to the homepage</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ty { padding-block: clamp(3rem, 8vw, 6rem); }
+  .ty-in { text-align: center; display: grid; justify-items: center; gap: 1rem; }
+  .ty-tick { width: 74px; height: 74px; border-radius: 50%; background: var(--cyan-50); color: var(--cyan-600); display: grid; place-items: center; }
+  .ty-tick svg { width: 36px; height: 36px; }
+  .ty h1 { font-size: var(--step-4); text-transform: none; }
+  .ty .lede { max-width: 50ch; }
+  .ty-next { text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.6rem 1.8rem; margin-top: 1rem; width: 100%; }
+  .ty-next h2 { font-size: 1.05rem; letter-spacing: .05em; margin-bottom: 1rem; }
+  .ty-next ol { margin: 0; padding-left: 1.2rem; display: grid; gap: .8rem; }
+  .ty-next li::marker { font-family: var(--font-display); font-weight: 900; color: var(--cyan-600); }
+  .ty-next strong { display: block; font-family: var(--font-display); color: var(--navy); }
+  .ty-next span { font-size: .93rem; color: var(--ink-2); line-height: 1.55; }
+  .ty-guar { display: grid; gap: .4rem; font-size: .95rem; color: var(--ink-2); }
+  .ty-guar strong { color: var(--navy); }
+  .ty-call { font-size: 1rem; color: var(--ink-2); }
+</style>

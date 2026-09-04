@@ -1,0 +1,52 @@
+---
+import { guarantees } from '@/data/business';
+
+const blocks = [
+  {
+    n: '01',
+    title: 'A fixed price, before anything happens',
+    body: 'You get a number and exactly what it covers before we book a thing. No hourly meter, no upsell on the day, no “well, it turned out to be bigger than we thought”.',
+  },
+  {
+    n: '02',
+    title: 'We walk the property with you',
+    body: 'Before we pack up, we walk it together in daylight. Anything you point out gets fixed there and then — not logged as a complaint for later.',
+  },
+  {
+    n: '03',
+    title: 'You don’t pay until you’re happy',
+    body: 'Payment comes last. If the work is not right, it gets put right, and if you are still not thrilled you do not pay. That is the whole arrangement.',
+  },
+  {
+    n: '04',
+    title: 'And you’re covered for 14 days after',
+    body: 'Monsoon, sprinklers or a dust storm inside two weeks? Call us. We come back and re-clean the affected glass at no charge.',
+  },
+];
+---
+<ol class="pb">
+  {blocks.map((b, i) => (
+    <li class="pb-item reveal" style={`transition-delay:${i * 70}ms`}>
+      <span class="pb-n">.{b.n}</span>
+      <h3>{b.title}</h3>
+      <p>{b.body}</p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .pb { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1.5rem, 3vw, 2.5rem); counter-reset: none; }
+  @media (max-width: 1000px) { .pb { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px)  { .pb { grid-template-columns: 1fr; } }
+
+  .pb-item { display: grid; gap: .55rem; align-content: start; padding-top: 1.5rem; border-top: 3px solid var(--cyan); }
+  .pb-n {
+    font-family: var(--font-display); font-weight: 900; font-size: 1.05rem;
+    color: var(--cyan-600); letter-spacing: .02em; font-variant-numeric: tabular-nums;
+  }
+  .pb-item h3 { font-size: 1.22rem; line-height: 1.15; }
+  .pb-item p { color: var(--ink-2); font-size: .98rem; line-height: 1.6; }
+  :global(.tone-navy) .pb-n { color: var(--cyan); }
+  :global(.tone-navy) .pb-item p { color: #b6c1dc; }
+  :global(.tone-navy) .pb-item { border-top-color: rgba(54,198,244,.55); }
+</style>

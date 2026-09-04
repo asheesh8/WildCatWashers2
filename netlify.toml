@@ -1,0 +1,69 @@
+# Wildcat Washers — Netlify deployment
+# Static Astro build. Forms are handled by Netlify Forms (see src/components/QuoteForm.astro).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# ---------------------------------------------------------------- headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+# Astro fingerprints everything in /_astro, so it can be cached forever.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/brand/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# ------------------------------------------------------------- redirects
+# Old site paths that already have inbound links and Google history.
+[[redirects]]
+  from = "/residential.html"
+  to = "/residential/"
+  status = 301
+
+[[redirects]]
+  from = "/commercial.html"
+  to = "/commercial/"
+  status = 301
+
+[[redirects]]
+  from = "/about.html"
+  to = "/about/"
+  status = 301
+
+[[redirects]]
+  from = "/contact.html"
+  to = "/contact/"
+  status = 301
+
+[[redirects]]
+  from = "/reviews.html"
+  to = "/reviews/"
+  status = 301
+
+# Non-www -> www, matching the canonical set in astro.config.mjs.
+[[redirects]]
+  from = "https://wildcatwashers.com/*"
+  to = "https://www.wildcatwashers.com/:splat"
+  status = 301
+  force = true

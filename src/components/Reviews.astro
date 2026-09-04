@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import { displayReviews, type Review } from '@/data/reviews';
+import { img, altFor } from '@/data/media';
+import { proof } from '@/data/business';
+
+export interface Props { items?: Review[]; limit?: number; }
+const { items = displayReviews, limit = 6 } = Astro.props;
+const list = items.slice(0, limit);
+const anyPlaceholder = list.some((r) => r.placeholder);
+---
+{list.length === 0 ? (
+  <p class="rv-empty">
+    Reviews are pulled from <code>src/data/reviews.ts</code>. Add real ones there to populate this section.
+  </p>
+) : (
+  <>
+    {anyPlaceholder && (
+      <p class="rv-warn">
+        <strong>Placeholder content — dev only.</strong> These cards show the layout. Paste real
+        reviews into <code>src/data/reviews.ts</code> and set <code>placeholder: false</code>.
+        Anything still marked as a placeholder is stripped from production builds.
+      </p>
+    )}
+    <ul class="rv">
+      {list.map((r, i) => (
+        <li class:list={['rv-card', r.placeholder && 'is-placeholder']} style={`transition-delay:${(i % 3) * 70}ms`}>
+          <div class="rv-top">
+            <span class="stars" aria-label={`${r.rating} out of 5 stars`}>
+              {[0,1,2,3,4].map(() => (
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              ))}
+            </span>
+            <span class="rv-src">{r.source}</span>
+          </div>
+          <blockquote>{r.text}</blockquote>
+          <div class="rv-foot">
+            {r.photo && (
+              <span class="rv-photo">
+                <Image src={img(r.photo)} alt={altFor(r.photo)} widths={[120, 240]} sizes="60px" quality={70} class="cover" />
+              </span>
+            )}
+            <span class="rv-who">
+              <strong>{r.name}</strong>
+              <small>{r.town}</small>
+            </span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </>
+)}
+
+<style>
+  .rv { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 1.5rem); }
+  @media (max-width: 980px) { .rv { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .rv { grid-template-columns: 1fr; } }
+
+  .rv-card {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 1.4rem 1.5rem 1.3rem; display: grid; gap: .9rem; align-content: start;
+    box-shadow: var(--shadow-sm);
+  }
+  .rv-card.is-placeholder { border-style: dashed; border-color: #e0b53a; background: #fffdf6; }
+
+  .rv-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .rv-src { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  blockquote { margin: 0; color: var(--ink); font-size: 1.02rem; line-height: 1.6; }
+  blockquote::before { content: '\201C'; }
+  blockquote::after { content: '\201D'; }
+
+  .rv-foot { display: flex; align-items: center; gap: .75rem; padding-top: .3rem; }
+  .rv-photo { flex: none; width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--surface-3); }
+  .rv-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .rv-who { display: grid; }
+  .rv-who strong { font-family: var(--font-display); font-weight: 700; font-size: .98rem; color: var(--navy); }
+  .rv-who small { font-size: .86rem; color: var(--ink-3); }
+
+  .rv-warn, .rv-empty {
+    background: #fff8e6; border: 1px solid #f0d489; border-left: 5px solid #e0a800;
+    border-radius: 12px; padding: .9rem 1.1rem; margin-bottom: 1.5rem;
+    font-size: .92rem; color: #6b5200; line-height: 1.55;
+  }
+  .rv-warn code, .rv-empty code { background: rgba(0,0,0,.06); padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+</style>

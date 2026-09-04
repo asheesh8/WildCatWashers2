@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import { services } from '@/data/business';
+import { img, altFor } from '@/data/media';
+export interface Props { area?: string; areaName?: string; }
+const { area, areaName } = Astro.props;
+---
+<ul class="sc-grid">
+  {services.map((s, i) => {
+    const href = area ? `/services/${s.slug}/${area}/` : `/services/${s.slug}/`;
+    return (
+      <li class="sc card card-hover reveal" style={`transition-delay:${i * 70}ms`}>
+        <a href={href} class="sc-link">
+          <div class="sc-media">
+            <Image src={img(s.cardImage)} alt={altFor(s.cardImage)} widths={[400, 700, 900]} sizes="(max-width: 760px) 92vw, 30vw" quality={74} class="cover" />
+            <span class="sc-num">{String(i + 1).padStart(2, '0')}</span>
+          </div>
+          <div class="sc-body">
+            <h3>{areaName ? `${s.name} in ${areaName}` : s.name}</h3>
+            <p class="sc-tag">{s.tagline}</p>
+            <p class="sc-sum">{s.summary}</p>
+            <ul class="sc-inc">
+              {s.included.slice(0, 3).map((x) => <li>{x}</li>)}
+            </ul>
+            <span class="sc-cta">
+              See what’s included
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+        </a>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .sc-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.2vw, 1.75rem); }
+  @media (max-width: 900px) { .sc-grid { grid-template-columns: 1fr; } }
+
+  .sc-link { display: grid; grid-template-rows: auto 1fr; height: 100%; text-decoration: none; color: inherit; }
+  .sc-media { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--surface-3); }
+  .sc-media :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+  .sc:hover .sc-media :global(img) { transform: scale(1.045); }
+  .sc-num {
+    position: absolute; top: .9rem; left: .9rem;
+    width: 38px; height: 38px; border-radius: 11px;
+    display: grid; place-items: center;
+    background: rgba(18,24,50,.78); backdrop-filter: blur(8px);
+    color: #fff; font-family: var(--font-display); font-weight: 900; font-size: .95rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sc-body { padding: 1.5rem 1.5rem 1.65rem; display: grid; align-content: start; gap: .6rem; }
+  .sc-body h3 { font-size: 1.4rem; }
+  .sc-tag { font-weight: 700; color: var(--cyan-600); font-size: .97rem; line-height: 1.4; }
+  .sc-sum { color: var(--ink-2); font-size: .97rem; line-height: 1.55; }
+  .sc-inc { list-style: none; margin: .4rem 0 .2rem; padding: 0; display: grid; gap: .4rem; }
+  .sc-inc li { display: grid; grid-template-columns: 20px 1fr; gap: .55rem; font-size: .93rem; color: var(--ink-2); align-items: start; }
+  .sc-inc li::before {
+    content: ''; width: 18px; height: 18px; border-radius: 50%; margin-top: .2em;
+    background: var(--cyan-100) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312a8db' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 11px no-repeat;
+  }
+  .sc-cta {
+    display: inline-flex; align-items: center; gap: .45rem; margin-top: .6rem;
+    font-family: var(--font-display); font-weight: 700; font-size: .96rem; color: var(--navy);
+  }
+  .sc-cta svg { width: 17px; height: 17px; color: var(--red); transition: transform .22s var(--ease); }
+  .sc:hover .sc-cta svg { transform: translateX(4px); }
+</style>

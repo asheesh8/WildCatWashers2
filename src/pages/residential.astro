@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCards from '@/components/ServiceCards.astro';
+import ProofGallery from '@/components/ProofGallery.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import FaqAccordion from '@/components/FaqAccordion.astro';
+import AreaGrid from '@/components/AreaGrid.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { faqById, guarantees, proof, objections, company } from '@/data/business';
+import { img, altFor } from '@/data/media';
+
+const rFaqs = ['price-windows','home-during-service','screens-included','how-often-windows','trust-in-home','worth-it'].map((id) => faqById[id]).filter(Boolean);
+const schema = [{ '@type': 'FAQPage', mainEntity: rFaqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }];
+---
+<Base
+  title="Residential Window Cleaning in Tucson, AZ | Wildcat Washers"
+  description={`Home window cleaning, solar panel cleaning and pressure washing across Greater Tucson. ${proof.customersServedLabel} homes cleaned, never a review below 5 stars. You don't pay until you're happy.`}
+  canonical="/residential/"
+  schema={schema}
+  breadcrumbs={[{ name: 'Residential', href: '/residential/' }]}
+>
+  <section class="rhero">
+    <div class="rhero-bg">
+      <Image src={img('clean-glass-wall-golf-course')} alt={altFor('clean-glass-wall-golf-course')} widths={[720, 1200, 1800]} sizes="100vw" loading="eager" fetchpriority="high" quality={70} class="cover" />
+      <div class="rhero-scrim"></div>
+    </div>
+    <div class="wrap rhero-in">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Residential</span></nav>
+      <h1>Your house, at its <span class="swipe">best</span>.</h1>
+      <p class="lede">
+        Homes across Green Valley, Sahuarita, Oro Valley, SaddleBrooke, Marana, the Foothills,
+        Tanque Verde and Tucson. Uniformed crews, marked trucks, and a walkthrough with you
+        before we ask for a penny.
+      </p>
+      <div class="rhero-cta">
+        <a class="btn btn-lg" href="/quote/">Get your free quote</a>
+        <a class="btn btn-lg btn-outline-light" href={`tel:${company.phoneRaw}`}>Call {company.phone}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="For your home" title="Three services, one visit." lede="Booking two at once costs less than two separate trips — we pass the saved drive time back." />
+      <ServiceCards />
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap two">
+      <div>
+        <SectionHead eyebrow="Built for this audience" title="Made easy on purpose." lede="A lot of our customers would simply rather not be on a ladder. That shapes how we work." />
+        <ul class="ticks big">
+          <li><strong>No ladders for you.</strong> Second storey, vaulted glass, clerestories and skylights are ours to deal with.</li>
+          <li><strong>We work around you.</strong> Arrival windows confirmed in advance, and we can do exterior-only if you are away.</li>
+          <li><strong>Nothing gets moved and left.</strong> Furniture goes back exactly where it was.</li>
+          <li><strong>You approve before you pay.</strong> A daylight walkthrough, together, every time.</li>
+          <li><strong>Seasonal residents welcome.</strong> Book before you arrive or before you leave — we will remind you when you are due.</li>
+        </ul>
+      </div>
+      <figure class="fig">
+        <Image src={img('tech-interior-window-golf-course')} alt={altFor('tech-interior-window-golf-course')} widths={[420, 780]} sizes="(max-width: 900px) 92vw, 42vw" quality={76} class="cover" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Real homes" title="What it looks like when it’s done." />
+      <ProofGallery />
+    </div>
+  </section>
+
+  <section class="section tone-navy">
+    <div class="wrap">
+      <SectionHead eyebrow="Straight answers" title="The things homeowners actually ask." />
+      <ul class="objs">
+        {objections.map((o) => (<li><h3>{o.q}</h3><p>{o.a}</p><p class="objs-proof">{o.proof}</p></li>))}
+      </ul>
+      <div class="guars">
+        {guarantees.map((g) => (<article><h3>{g.name}</h3><p>{g.headline}</p></article>))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap proc">
+      <SectionHead eyebrow="How it works" title="Quote to spotless." />
+      <div class="proc-inner"><ProcessSteps /></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Where" title="Homes we look after." />
+      <AreaGrid />
+    </div>
+  </section>
+
+  <section class="section tone-soft">
+    <div class="wrap faq-wrap">
+      <SectionHead eyebrow="Questions" title="Residential FAQs." />
+      <FaqAccordion items={rFaqs} />
+    </div>
+  </section>
+
+  <CtaBand title="Let’s make your house look after itself." />
+</Base>
+
+<style>
+  .rhero { position: relative; isolation: isolate; padding-block: clamp(3rem, 7vw, 5.5rem); color: #fff; overflow: hidden; }
+  .rhero-bg { position: absolute; inset: 0; z-index: -1; }
+  .rhero-bg :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .rhero-scrim { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(9,13,30,.94) 0%, rgba(9,13,30,.80) 50%, rgba(9,13,30,.48) 100%); }
+  .rhero-in { max-width: 760px; }
+  .rhero h1 { font-size: var(--step-4); color: #fff; margin-block: .55rem .8rem; text-transform: none; }
+  .rhero h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .rhero .lede { max-width: 58ch; margin-bottom: 1.75rem; }
+  .rhero-cta { display: flex; flex-wrap: wrap; gap: .7rem; }
+  @media (max-width: 640px) { .rhero-cta .btn { flex: 1 1 100%; } }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+
+  .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  .ticks.big li { font-size: 1rem; line-height: 1.55; }
+  .ticks.big strong { color: var(--navy); }
+  .fig { margin: 0; }
+  .fig :global(img) { width: 100%; border-radius: var(--radius-xl); aspect-ratio: 4/5; object-fit: cover; box-shadow: var(--shadow); }
+
+  .objs { list-style: none; margin: 0 0 3rem; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.25rem, 3vw, 2rem); }
+  @media (max-width: 900px) { .objs { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .objs { grid-template-columns: 1fr; } }
+  .objs li { padding-left: 1.1rem; border-left: 3px solid rgba(54,198,244,.5); }
+  .objs h3 { font-size: 1.08rem; text-transform: none; letter-spacing: -.02em; margin-bottom: .35rem; color: #fff; }
+  .objs p { color: #b6c1dc; line-height: 1.6; font-size: .96rem; }
+  .objs-proof { margin-top: .4rem; font-size: .85rem !important; font-weight: 700; color: var(--cyan) !important; }
+  .guars { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 700px) { .guars { grid-template-columns: 1fr; } }
+  .guars article { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius-lg); padding: 1.4rem 1.6rem; }
+  .guars h3 { font-size: 1.1rem; color: var(--cyan); margin-bottom: .3rem; }
+  .guars p { color: #cbd5ea; font-size: .95rem; line-height: 1.5; }
+
+  .proc-inner { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: .5rem clamp(1.25rem, 3vw, 2.25rem); }
+  .faq-wrap { max-width: 900px; }
+</style>

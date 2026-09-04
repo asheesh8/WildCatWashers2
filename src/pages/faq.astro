@@ -1,0 +1,105 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import FaqAccordion from '@/components/FaqAccordion.astro';
+import AskWildcat from '@/components/AskWildcat.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { faqs, company } from '@/data/business';
+
+const groups = [
+  { title: 'Pricing', topic: 'pricing' },
+  { title: 'Window cleaning', topic: 'window-cleaning' },
+  { title: 'Solar panel cleaning', topic: 'solar-panel-cleaning' },
+  { title: 'Pressure washing', topic: 'pressure-washing' },
+  { title: 'How it works', topic: 'process' },
+  { title: 'Trust, safety and damage', topic: 'safety' },
+  { title: 'Guarantees', topic: 'guarantee' },
+  { title: 'Maintenance', topic: 'maintenance' },
+  { title: 'Service areas', topic: 'areas' },
+  { title: 'Commercial', topic: 'commercial' },
+];
+
+const seen = new Set<string>();
+const sections = groups
+  .map((g) => {
+    const items = faqs.filter((f) => f.topics.includes(g.topic) && !seen.has(f.id));
+    items.forEach((f) => seen.add(f.id));
+    return { ...g, items };
+  })
+  .filter((g) => g.items.length > 0);
+
+const leftovers = faqs.filter((f) => !seen.has(f.id));
+if (leftovers.length) sections.push({ title: 'Everything else', topic: 'other', items: leftovers });
+
+const schema = [{
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+}];
+---
+<Base
+  title="Frequently Asked Questions | Wildcat Washers Tucson"
+  description="Everything people ask us about window cleaning, solar panel cleaning and pressure washing in Tucson — pricing, process, guarantees, safety and service areas."
+  canonical="/faq/"
+  schema={schema}
+  breadcrumbs={[{ name: 'FAQ', href: '/faq/' }]}
+>
+  <section class="hub tone-navy">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">FAQ</span></nav>
+      <h1>Ask us <span class="swipe">anything</span>.</h1>
+      <p class="lede">Every question we get asked, answered honestly — including the ones where the answer is “it depends” or “no”.</p>
+      <div class="hub-ask"><AskWildcat variant="hero" placeholder="Type your question…" /></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap faq-layout">
+      <nav class="faq-nav" aria-label="FAQ sections">
+        <p class="faq-nav-lbl">Jump to</p>
+        <ul>
+          {sections.map((s) => <li><a href={`#${s.topic}`}>{s.title}</a></li>)}
+        </ul>
+        <div class="faq-nav-cta">
+          <p>Still stuck?</p>
+          <a class="tel-link" href={`tel:${company.phoneRaw}`}>{company.phone}</a>
+          <a class="btn btn-sm btn-block" href="/quote/">Get a free quote</a>
+        </div>
+      </nav>
+      <div class="faq-body">
+        {sections.map((s) => (
+          <section class="faq-group" id={s.topic}>
+            <SectionHead title={s.title} as="h2" />
+            <FaqAccordion items={s.items} open={-1} />
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .hub { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .hub h1 { font-size: var(--step-4); color: #fff; margin-block: .6rem .8rem; text-transform: none; }
+  .hub h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .hub .lede { max-width: 58ch; margin-bottom: 1.75rem; }
+  .hub-ask { max-width: 680px; }
+  .crumbs { font-size: .85rem; color: #9fadcb; display: flex; gap: .4rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+
+  .faq-layout { display: grid; grid-template-columns: 250px 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  @media (max-width: 900px) { .faq-layout { grid-template-columns: 1fr; } }
+  .faq-nav { position: sticky; top: 110px; }
+  @media (max-width: 900px) { .faq-nav { position: static; } }
+  .faq-nav-lbl { font-family: var(--font-display); font-size: .74rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .8rem; }
+  .faq-nav ul { list-style: none; margin: 0 0 1.75rem; padding: 0; display: grid; gap: .1rem; }
+  .faq-nav a:not(.btn) { display: block; padding: .5rem .7rem; margin-inline: -.7rem; border-radius: 8px; color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: .95rem; }
+  .faq-nav a:not(.btn):hover { background: var(--cyan-50); color: var(--navy); }
+  .faq-nav-cta { padding: 1.25rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-lg); display: grid; gap: .5rem; }
+  .faq-nav-cta p { font-family: var(--font-display); font-weight: 800; color: var(--navy); }
+  .faq-body { display: grid; gap: clamp(2rem, 4vw, 3rem); }
+  .faq-group :global(.sh) { margin-bottom: 1rem; }
+  .faq-group :global(h2) { font-size: var(--step-2); }
+</style>

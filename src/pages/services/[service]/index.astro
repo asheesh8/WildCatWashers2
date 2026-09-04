@@ -1,0 +1,405 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProofGallery from '@/components/ProofGallery.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import FaqAccordion from '@/components/FaqAccordion.astro';
+import Reviews from '@/components/Reviews.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import QuoteForm from '@/components/QuoteForm.astro';
+import AskWildcat from '@/components/AskWildcat.astro';
+import { services, locations, faqById, guarantees, safety, company, proof, allAreaNames } from '@/data/business';
+import { reviewsFor } from '@/data/reviews';
+import { img, altFor } from '@/data/media';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { service: service.slug }, props: { service } }));
+}
+
+const { service: s } = Astro.props;
+const serviceFaqs = s.faqIds.map((id) => faqById[id]).filter(Boolean);
+const otherServices = services.filter((x) => x.slug !== s.slug);
+const serviceReviews = reviewsFor(s.slug);
+
+const title = `${s.name} Services Across Greater Tucson, AZ | Wildcat Washers`;
+const description = `${s.summary} ${proof.customersServedLabel} customers, never a review below 5 stars. Free same-day quotes — you don't pay until you're happy.`;
+
+const schema = [
+  {
+    '@type': 'Service',
+    name: s.name,
+    serviceType: s.keywords.primary,
+    description: s.summary,
+    provider: { '@id': `${company.url}/#business` },
+    areaServed: locations.map((l) => ({ '@type': 'City', name: l.fullName })),
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: `${s.name} options`,
+      itemListElement: [...s.included, ...s.addOns].map((x) => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: x },
+      })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: serviceFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+];
+---
+
+<Base
+  title={title}
+  description={description}
+  canonical={`/services/${s.slug}/`}
+  schema={schema}
+  breadcrumbs={[{ name: 'Services', href: '/services/' }, { name: s.name, href: `/services/${s.slug}/` }]}
+>
+  <!-- ---------------------------------------------------------------- hero -->
+  <section class="shero">
+    <div class="shero-bg">
+      <Image src={img(s.heroImage)} alt={altFor(s.heroImage)} widths={[720, 1200, 1800]} sizes="100vw" loading="eager" fetchpriority="high" quality={70} class="cover" />
+      <div class="shero-scrim"></div>
+    </div>
+    <div class="wrap shero-in">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">/</span>
+        <a href="/services/">Services</a> <span aria-hidden="true">/</span>
+        <span aria-current="page">{s.name}</span>
+      </nav>
+      <h1>{s.name} across <span class="swipe">Greater Tucson</span></h1>
+      <p class="shero-tag">{s.tagline}</p>
+      <p class="shero-sum">{s.summary}</p>
+      <div class="shero-cta">
+        <a class="btn btn-lg" href={`/quote/?service=${s.slug}`}>Get your free quote</a>
+        <a class="btn btn-lg btn-outline-light" href={`tel:${company.phoneRaw}`}>Call {company.phone}</a>
+      </div>
+      <ul class="shero-proof">
+        <li>{proof.customersServedLabel} customers served</li>
+        <li>You don’t pay until you’re happy</li>
+        <li>14-Day Spotless Guarantee</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- for who -->
+  <section class="section">
+    <div class="wrap two-col">
+      <div>
+        <SectionHead
+          eyebrow="Who it’s for"
+          title={`If any of this sounds like your house, ${s.shortName} is the job.`}
+        />
+        <ul class="ticks big-ticks">{s.forWho.map((x) => <li>{x}</li>)}</ul>
+        <p class="outcome"><strong>The outcome:</strong> {s.outcome}</p>
+      </div>
+      <figure class="two-col-fig">
+        <Image src={img(s.galleryImages[0])} alt={altFor(s.galleryImages[0])} widths={[420, 760, 1000]} sizes="(max-width: 900px) 92vw, 42vw" quality={76} class="cover" />
+      </figure>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ problems -->
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead
+        eyebrow="What we actually solve"
+        title="The problems, and how we handle each one."
+        lede="Generic promises are easy. Here is the specific thing we do about each specific problem."
+      />
+      <ul class="probs">
+        {s.problems.map((p, i) => (
+          <li class="prob reveal" style={`transition-delay:${(i % 2) * 70}ms`}>
+            <p class="prob-n">.{String(i + 1).padStart(2, '0')}</p>
+            <h3>{p.problem}</h3>
+            <p class="prob-a">{p.solution}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ included -->
+  <section class="section">
+    <div class="wrap inc-wrap">
+      <div class="inc-col">
+        <SectionHead eyebrow="What’s included" title="Every job, as standard." as="h2" />
+        <ul class="ticks">{s.included.map((x) => <li>{x}</li>)}</ul>
+      </div>
+      <div class="inc-col">
+        <SectionHead eyebrow="Add-ons" title="Available if you want them." as="h2" />
+        <ul class="ticks ticks-alt">{s.addOns.map((x) => <li>{x}</li>)}</ul>
+      </div>
+      <div class="inc-col">
+        <SectionHead eyebrow="Honest limits" title="What we won’t promise." as="h2" />
+        <ul class="limits">{s.limitations.map((x) => <li>{x}</li>)}</ul>
+        <p class="limits-note">
+          We would rather tell you this before you have paid than after. It is the same reason
+          you don’t pay until the work is done.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------------- proof -->
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead eyebrow="Real jobs" title="What it looks like when it’s done." />
+      <ul class="gal">
+        {s.galleryImages.map((k, i) => (
+          <li class="reveal" style={`transition-delay:${(i % 3) * 70}ms`}>
+            <Image src={img(k)} alt={altFor(k)} widths={[400, 720, 1000]} sizes="(max-width: 700px) 92vw, 31vw" quality={74} class="cover" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- pricing -->
+  <section class="section">
+    <div class="wrap two-col two-col-rev">
+      <div>
+        <SectionHead
+          eyebrow="Pricing"
+          title="What changes the price."
+          lede={`We price ${s.shortName} per job, not per hour, and you get the number before anything is booked. These are the things that move it:`}
+        />
+        <ul class="ticks">{s.pricingFactors.map((x) => <li>{x}</li>)}</ul>
+        <div class="price-cta">
+          <a class="btn" href={`/quote/?service=${s.slug}`}>Get a fixed price</a>
+          <p>Most quotes go out the same day. No site visit needed for most homes.</p>
+        </div>
+      </div>
+      <div class="guar-box">
+        {guarantees.map((g) => (
+          <article>
+            <h3>{g.name}</h3>
+            <p>{g.headline}</p>
+            <p class="gb-body">{g.body}</p>
+          </article>
+        ))}
+        <a class="btn btn-sm btn-ghost" href="/guarantee/">How the guarantees work</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------------- safety -->
+  <section class="section tone-navy">
+    <div class="wrap">
+      <SectionHead
+        eyebrow="Property protection"
+        title="How we look after your house while we’re in it."
+        lede="Concrete operational detail beats “professional quality” every time. This is what actually happens."
+      />
+      <ul class="safety">
+        {safety.map((x) => (
+          <li><h3>{x.title}</h3><p>{x.body}</p></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- process -->
+  <section class="section">
+    <div class="wrap proc">
+      <SectionHead eyebrow="How it works" title="Quote to spotless." />
+      <div class="proc-inner"><ProcessSteps /></div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------------- areas -->
+  <section class="section tone-soft">
+    <div class="wrap">
+      <SectionHead
+        eyebrow="Where we do it"
+        title={`${s.name} across Greater Tucson.`}
+        lede={`We run a weekly route through ${allAreaNames()}. Pick your town for local pricing factors, nearby communities and scheduling.`}
+      />
+      <ul class="area-links">
+        {locations.map((l) => (
+          <li>
+            <a href={`/services/${s.slug}/${l.slug}/`}>
+              <strong>{s.name} in {l.name}</strong>
+              <span>{l.communities.slice(0, 2).join(' · ')}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- reviews -->
+  {serviceReviews.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <SectionHead eyebrow="What customers say" title={`${s.name} reviews.`} />
+        <Reviews items={serviceReviews} limit={3} />
+      </div>
+    </section>
+  )}
+
+  <!-- ----------------------------------------------------------------- faq -->
+  <section class="section tone-soft">
+    <div class="wrap faq-wrap">
+      <SectionHead eyebrow="Questions" title={`${s.name} — the common questions.`} />
+      <FaqAccordion items={serviceFaqs} />
+      <div class="faq-ask">
+        <p class="faq-ask-lbl">Something else on your mind?</p>
+        <AskWildcat variant="inline" placeholder={`Ask anything about ${s.name.toLowerCase()}…`} />
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- other svcs -->
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Also worth doing" title="While we’re already there." lede="Booking two services on one visit costs less than two separate trips — we pass the saved drive time back to you." />
+      <ul class="other">
+        {otherServices.map((o) => (
+          <li>
+            <a href={`/services/${o.slug}/`}>
+              <Image src={img(o.cardImage)} alt={altFor(o.cardImage)} widths={[380, 700]} sizes="(max-width: 760px) 92vw, 45vw" quality={72} class="cover" />
+              <div>
+                <h3>{o.name}</h3>
+                <p>{o.tagline}</p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand service={s.slug} title={`Ready for ${s.name.toLowerCase()} that actually holds up?`} />
+
+  <section class="section">
+    <div class="wrap-narrow">
+      <SectionHead align="center" eyebrow="Free quote" title={`Get a fixed price for ${s.name.toLowerCase()}.`} />
+      <QuoteForm service={s.slug} id={`quote-${s.slug}`} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ------------------------------------------------------------- hero */
+  .shero { position: relative; isolation: isolate; padding-block: clamp(3rem, 7vw, 5.5rem); color: #fff; overflow: hidden; }
+  .shero-bg { position: absolute; inset: 0; z-index: -1; }
+  .shero-bg :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center 45%; }
+  .shero-scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, rgba(9,13,30,.94) 0%, rgba(9,13,30,.82) 46%, rgba(9,13,30,.52) 100%);
+  }
+  .shero-in { max-width: 760px; }
+  .shero h1 { font-size: var(--step-4); color: #fff; margin-block: .5rem .6rem; text-transform: none; }
+  .shero h1 .swipe::after { background: var(--cyan); opacity: .95; height: .15em; }
+  .shero-tag { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1); color: var(--cyan); margin-bottom: .8rem; line-height: 1.25; }
+  .shero-sum { font-size: 1.08rem; line-height: 1.6; color: #d3dbec; max-width: 62ch; margin-bottom: 1.75rem; }
+  .shero-cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem; }
+  .shero-proof { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; font-size: .92rem; font-weight: 600; color: #c3cde6; }
+  .shero-proof li::before { content: '✓'; color: var(--cyan); font-weight: 900; margin-right: .4rem; }
+  @media (max-width: 700px) { .shero-cta .btn { flex: 1 1 100%; } }
+
+  .crumbs { font-size: .86rem; color: #9fadcb; display: flex; flex-wrap: wrap; gap: .45rem; }
+  .crumbs a { color: #cfd8ec; text-decoration: none; }
+  .crumbs a:hover { color: var(--cyan); }
+  .crumbs span[aria-current] { color: #fff; font-weight: 600; }
+
+  /* -------------------------------------------------------- two column */
+  .two-col { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  .two-col-rev { align-items: start; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+  .two-col-fig { margin: 0; }
+  .two-col-fig :global(img) { width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/5; object-fit: cover; box-shadow: var(--shadow); }
+  .big-ticks li { font-size: 1.05rem; }
+  .outcome { margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--cyan-50); border-left: 4px solid var(--cyan); border-radius: 0 12px 12px 0; color: var(--ink-2); }
+  .outcome strong { color: var(--navy); }
+
+  /* ---------------------------------------------------------- problems */
+  .probs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.25rem, 3vw, 2.25rem); }
+  @media (max-width: 780px) { .probs { grid-template-columns: 1fr; } }
+  .prob { padding-top: 1.25rem; border-top: 3px solid var(--cyan); display: grid; gap: .4rem; align-content: start; }
+  .prob-n { font-family: var(--font-display); font-weight: 900; font-size: 1rem; color: var(--cyan-600); }
+  .prob h3 { font-size: 1.18rem; text-transform: none; letter-spacing: -.02em; }
+  .prob-a { color: var(--ink-2); line-height: 1.6; font-size: .99rem; }
+
+  /* ---------------------------------------------------------- included */
+  .inc-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: start; }
+  @media (max-width: 900px) { .inc-wrap { grid-template-columns: 1fr; } }
+  .inc-col :global(.sh) { margin-bottom: 1.25rem; }
+  .inc-col :global(h2) { font-size: 1.35rem; }
+  .ticks-alt li::before { background-color: #fdeef1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d91e3d' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+  .limits { list-style: none; padding: 0; display: grid; gap: .8rem; }
+  .limits li { display: grid; grid-template-columns: 22px 1fr; gap: .8rem; color: var(--ink-2); font-size: .97rem; line-height: 1.5; }
+  .limits li::before {
+    content: ''; width: 22px; height: 22px; border-radius: 50%; margin-top: .12em;
+    background: var(--surface-3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23626b8a' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 8v5M12 16.5v.01'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+  .limits-note { margin-top: 1rem; font-size: .92rem; color: var(--ink-3); line-height: 1.55; }
+
+  /* ----------------------------------------------------------- gallery */
+  .gal { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.8rem, 1.8vw, 1.35rem); }
+  @media (max-width: 700px) { .gal { grid-template-columns: 1fr 1fr; } }
+  .gal li { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; background: var(--surface-3); box-shadow: var(--shadow-sm); }
+  .gal :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+  .gal li:hover :global(img) { transform: scale(1.05); }
+
+  /* ----------------------------------------------------------- pricing */
+  .price-cta { margin-top: 1.75rem; display: grid; gap: .7rem; justify-items: start; }
+  .price-cta p { font-size: .92rem; color: var(--ink-3); }
+  .guar-box { display: grid; gap: 1.25rem; padding: clamp(1.5rem, 3vw, 2rem); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-lg); justify-items: start; }
+  .guar-box h3 { font-size: 1.15rem; color: var(--navy); }
+  .guar-box article > p:first-of-type { font-weight: 700; color: var(--cyan-600); margin-block: .3rem .5rem; }
+  .gb-body { color: var(--ink-2); font-size: .96rem; line-height: 1.6; }
+
+  /* ------------------------------------------------------------ safety */
+  .safety { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.25rem, 3vw, 2.25rem); }
+  @media (max-width: 900px) { .safety { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .safety { grid-template-columns: 1fr; } }
+  .safety li { padding-top: 1.1rem; border-top: 2px solid rgba(54,198,244,.45); }
+  .safety h3 { font-size: 1.08rem; color: #fff; margin-bottom: .35rem; }
+  .safety p { color: #b6c1dc; font-size: .96rem; line-height: 1.6; }
+
+  /* ----------------------------------------------------------- process */
+  .proc-inner { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: .5rem clamp(1.25rem, 3vw, 2.25rem); }
+
+  /* ------------------------------------------------------------- areas */
+  .area-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
+  @media (max-width: 1000px) { .area-links { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .area-links { grid-template-columns: 1fr; } }
+  .area-links a {
+    display: grid; gap: .2rem; position: relative;
+    padding: 1rem 2.5rem 1rem 1.1rem;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    text-decoration: none; height: 100%;
+    transition: border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+  }
+  .area-links a:hover { border-color: var(--cyan); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .area-links strong { font-family: var(--font-display); font-weight: 700; color: var(--navy); font-size: 1rem; line-height: 1.25; }
+  .area-links span { font-size: .84rem; color: var(--ink-3); }
+  .area-links svg { position: absolute; right: 1rem; top: 1.15rem; width: 16px; height: 16px; color: var(--red); }
+
+  /* --------------------------------------------------------------- faq */
+  .faq-wrap { max-width: 900px; }
+  .faq-ask { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  .faq-ask-lbl { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--navy); margin-bottom: .8rem; }
+
+  /* ------------------------------------------------------- other svcs */
+  .other { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 2.5vw, 1.75rem); }
+  @media (max-width: 760px) { .other { grid-template-columns: 1fr; } }
+  .other a {
+    display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 1.25rem;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
+    overflow: hidden; text-decoration: none; color: inherit;
+    transition: border-color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease);
+  }
+  .other a:hover { border-color: var(--cyan); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .other :global(img) { width: 150px; height: 100%; min-height: 130px; object-fit: cover; }
+  .other h3 { font-size: 1.18rem; }
+  .other p { color: var(--ink-2); font-size: .94rem; line-height: 1.45; padding-right: 1rem; }
+</style>

@@ -1,0 +1,106 @@
+---
+import Base from '@/layouts/Base.astro';
+import QuoteForm from '@/components/QuoteForm.astro';
+import AskWildcat from '@/components/AskWildcat.astro';
+import { company, locations, alsoServing, allAreaNames } from '@/data/business';
+
+const schema = [{
+  '@type': 'ContactPage',
+  mainEntity: { '@id': `${company.url}/#business` },
+}];
+---
+<Base
+  title="Contact Wildcat Washers | Tucson Window Cleaning"
+  description={`Call or text ${company.phone}, email ${company.email}, or send a message. Serving ${allAreaNames()} and surrounding communities. Most quotes go out the same day.`}
+  canonical="/contact/"
+  schema={schema}
+  breadcrumbs={[{ name: 'Contact', href: '/contact/' }]}
+>
+  <section class="c">
+    <div class="wrap c-in">
+      <div>
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Contact</span></nav>
+        <h1>Get in touch.</h1>
+        <p class="lede">Call, text, email or fill in the form. Whichever you pick, you get a real answer from a real person — usually the same day.</p>
+
+        <div class="c-methods">
+          <a class="c-method" href={`tel:${company.phoneRaw}`} data-track="call-contact">
+            <span class="c-ico"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><small>Call or text</small><strong>{company.phone}</strong></span>
+          </a>
+          <a class="c-method" href={`mailto:${company.email}`}>
+            <span class="c-ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m3 6.5 9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><small>Email</small><strong>{company.email}</strong></span>
+          </a>
+        </div>
+
+        <dl class="c-meta">
+          <div><dt>Hours</dt><dd>{company.hoursHuman}</dd></div>
+          <div><dt>Based in</dt><dd>{company.city}, {company.state}</dd></div>
+          <div><dt>Serving</dt><dd>{allAreaNames()}, plus {alsoServing.join(', ')}</dd></div>
+          <div><dt>Licensing</dt><dd>Licensed &amp; insured · BBB accredited</dd></div>
+        </dl>
+
+        <div class="c-ask">
+          <p class="c-ask-lbl">Or just ask a question</p>
+          <AskWildcat variant="inline" placeholder="Try “how much for a two storey house?”" />
+        </div>
+
+        <div class="c-areas">
+          <h2>Service areas</h2>
+          <ul>{locations.map((l) => <li><a href={`/areas/${l.slug}/`}>{l.name}</a></li>)}</ul>
+        </div>
+      </div>
+
+      <div class="c-form">
+        <h2>Send a message</h2>
+        <p>Fastest way to a fixed price. No obligation.</p>
+        <QuoteForm id="contact-quote" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .c { padding-block: clamp(2rem, 5vw, 3.5rem) clamp(3rem, 6vw, 5rem); }
+  .c-in { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  @media (max-width: 940px) { .c-in { grid-template-columns: 1fr; } }
+  .c h1 { font-size: var(--step-4); margin-block: .55rem .7rem; text-transform: none; }
+  .c .lede { max-width: 52ch; margin-bottom: 2rem; }
+  .crumbs { font-size: .85rem; color: var(--ink-3); display: flex; gap: .4rem; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs span[aria-current] { color: var(--navy); font-weight: 600; }
+
+  .c-methods { display: grid; gap: .75rem; margin-bottom: 2rem; }
+  .c-method {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.1rem 1.25rem; border-radius: var(--radius-lg);
+    background: var(--surface-2); border: 1px solid var(--line);
+    text-decoration: none; color: inherit;
+    transition: border-color .18s var(--ease), transform .18s var(--ease);
+  }
+  .c-method:hover { border-color: var(--cyan); transform: translateY(-2px); }
+  .c-ico { flex: none; width: 46px; height: 46px; border-radius: 13px; background: var(--cyan-50); color: var(--cyan-600); display: grid; place-items: center; }
+  .c-ico svg { width: 22px; height: 22px; }
+  .c-method small { display: block; font-size: .8rem; color: var(--ink-3); font-weight: 600; }
+  .c-method strong { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: var(--navy); letter-spacing: -.02em; word-break: break-word; }
+
+  .c-meta { display: grid; gap: .85rem; padding: 1.4rem 0; border-block: 1px solid var(--line); margin-bottom: 2rem; }
+  .c-meta div { display: grid; grid-template-columns: 110px 1fr; gap: 1rem; }
+  .c-meta dt { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding-top: .15rem; }
+  .c-meta dd { margin: 0; color: var(--ink-2); font-size: .96rem; line-height: 1.5; }
+  @media (max-width: 520px) { .c-meta div { grid-template-columns: 1fr; gap: .2rem; } }
+
+  .c-ask { margin-bottom: 2rem; }
+  .c-ask-lbl { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--navy); margin-bottom: .7rem; }
+
+  .c-areas h2 { font-size: 1.05rem; letter-spacing: .05em; margin-bottom: .8rem; }
+  .c-areas ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .45rem; }
+  .c-areas a { display: inline-block; padding: .4rem .85rem; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-size: .89rem; font-weight: 600; color: var(--ink-2); text-decoration: none; }
+  .c-areas a:hover { border-color: var(--cyan); background: var(--cyan-50); color: var(--navy); }
+
+  .c-form { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-xl); padding: clamp(1.5rem, 3vw, 2.25rem); box-shadow: var(--shadow); position: sticky; top: 110px; }
+  @media (max-width: 940px) { .c-form { position: static; } }
+  .c-form h2 { font-size: var(--step-2); margin-bottom: .4rem; }
+  .c-form > p { color: var(--ink-3); font-size: .95rem; margin-bottom: 1.5rem; }
+</style>

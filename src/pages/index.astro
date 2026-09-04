@@ -1,0 +1,211 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Hero from '@/components/Hero.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCards from '@/components/ServiceCards.astro';
+import ProofGallery from '@/components/ProofGallery.astro';
+import QuoteForm from '@/components/QuoteForm.astro';
+import { company, proof, awards, faqs, guarantees, locations, allAreaNames } from '@/data/business';
+import { img, altFor } from '@/data/media';
+
+const homeFaqs = ['price-windows', 'how-often-windows', 'rain-again', 'guarantee', 'trust-in-home', 'areas']
+  .map((id) => faqs.find((f) => f.id === id)!)
+  .filter(Boolean);
+
+const schema = [
+  {
+    '@type': 'FAQPage',
+    mainEntity: homeFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+];
+---
+
+<Base
+  title="Window Cleaning in Tucson, AZ | Wildcat Washers — We Have a Spotless Reputation"
+  description="Professional window cleaning, solar panel cleaning and pressure washing across Greater Tucson. 1,000+ homes cleaned, never a review below 5 stars. Free same-day quotes — you don't pay until you're happy."
+  canonical="/"
+  schema={schema}
+>
+  <Hero slot="above-header" />
+
+  <!-- ------------------------------------------------------------- proof bar -->
+  <section class="bar tone-cream">
+    <div class="wrap">
+      <ul class="bar-stats">
+        <li><strong>{proof.customersServedLabel}</strong><span>homes &amp; businesses cleaned</span></li>
+        <li><strong>5.0</strong><span>stars &mdash; never a review below it</span></li>
+        <li><strong>8</strong><span>towns across {company.region}</span></li>
+        <li><strong>14</strong><span>day Spotless Guarantee</span></li>
+      </ul>
+      <ul class="bar-awards">
+        {awards.map((a) => <li>{a.short}{a.year ? ` ${a.year}` : ''}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ services -->
+  <section class="section">
+    <div class="wrap">
+      <SectionHead
+        eyebrow="What we do"
+        title="Three services. <em>One standard.</em>"
+        lede="Windows, solar panels and exterior surfaces &mdash; done properly, by a uniformed crew, with the same guarantee behind every one of them."
+      />
+      <ServiceCards />
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------------- proof -->
+  <section class="section tone-cream">
+    <div class="wrap">
+      <SectionHead
+        eyebrow="Real jobs, real glass"
+        title="The difference is not subtle."
+        lede="Every photo on this site is a Wildcat Washers job in the Tucson area. No stock imagery, no borrowed before-and-afters."
+      />
+      <ProofGallery />
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------- trust routing -->
+  <section class="section tone-navy routes">
+    <div class="wrap">
+      <div class="routes-grid">
+        <article class="rt">
+          <p class="rt-n">.01</p>
+          <h2>You don&rsquo;t pay until you&rsquo;re happy</h2>
+          <p>
+            A fixed price before anything is booked, a walkthrough with you in daylight when the
+            work is done, and a 14-day guarantee if the weather undoes it.
+          </p>
+          <a class="rt-link" href="/guarantee/">How the guarantees work<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </article>
+
+        <article class="rt">
+          <p class="rt-n">.02</p>
+          <h2>Never a review below five stars</h2>
+          <p>
+            Across {proof.customersServedLabel} customers on Google, Nextdoor, BBB, Angi and
+            Thumbtack. That is the entire reason the tagline says what it says.
+          </p>
+          <a class="rt-link" href="/reviews/">Read the reviews<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5.5-5.5M18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </article>
+
+        <article class="rt">
+          <p class="rt-n">.03</p>
+          <h2>Eight towns, one weekly route</h2>
+          <p>
+            {allAreaNames()} &mdash; which is why we can usually get to you this week rather than
+            next month.
+          </p>
+          <ul class="rt-chips">
+            {locations.map((l) => <li><a href={`/areas/${l.slug}/`}>{l.name}</a></li>)}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- form -->
+  <section class="section final">
+    <div class="wrap final-in">
+      <div class="final-text">
+        <p class="eyebrow">Free quote</p>
+        <h2>Let&rsquo;s get your glass sorted.</h2>
+        <p class="lede">
+          Four quick questions and you get a fixed price, usually the same day. No site visit
+          needed for most homes, no obligation, and no payment until the work is done and
+          you&rsquo;re happy with it.
+        </p>
+        <ul class="ticks final-ticks">
+          <li>Same-day quotes, most days</li>
+          <li>Fixed price before you book &mdash; no hourly meter</li>
+          <li>Veteran and senior discounts</li>
+          <li>10% off your first service</li>
+        </ul>
+        <figure class="final-fig">
+          <Image
+            src={img('award-az19-winner-2025')}
+            alt={altFor('award-az19-winner-2025')}
+            widths={[360, 640]}
+            sizes="(max-width: 940px) 92vw, 34vw"
+            quality={74}
+            class="cover"
+          />
+          <figcaption>2025 AZ-19 Readers&rsquo; Pick &mdash; Best Window Cleaner, Green Valley News &amp; Sahuarita Sun.</figcaption>
+        </figure>
+      </div>
+
+      <div class="final-form">
+        <QuoteForm id="home-quote" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ------------------------------------------------------------ proof bar */
+  .bar { padding-block: clamp(2rem, 4vw, 3rem); }
+  .bar-stats {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
+  }
+  @media (max-width: 820px) { .bar-stats { grid-template-columns: 1fr 1fr; gap: 1.25rem; } }
+  .bar-stats li { display: grid; gap: .15rem; padding-left: 1.1rem; border-left: 3px solid var(--cyan); }
+  .bar-stats strong {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: clamp(1.85rem, 3.8vw, 2.8rem); line-height: 1; letter-spacing: -.04em; color: var(--navy);
+  }
+  .bar-stats span { font-size: .89rem; color: var(--ink-3); line-height: 1.35; font-weight: 500; }
+
+  .bar-awards {
+    list-style: none; display: flex; flex-wrap: wrap; gap: .5rem;
+    margin: 1.75rem 0 0; padding: 1.5rem 0 0; border-top: 1px solid var(--cream-2);
+  }
+  .bar-awards li {
+    padding: .4rem .9rem; border-radius: 999px;
+    background: rgba(255,255,255,.75); border: 1px solid var(--cream-2);
+    font-family: var(--font-display); font-weight: 700; font-size: .84rem; color: var(--navy);
+  }
+
+  /* -------------------------------------------------------- trust routing */
+  .routes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3.5vw, 3rem); }
+  @media (max-width: 940px) { .routes-grid { grid-template-columns: 1fr; } }
+  .rt { display: grid; gap: .55rem; align-content: start; padding-top: 1.4rem; border-top: 3px solid var(--cyan); }
+  .rt-n { font-family: var(--font-display); font-weight: 900; font-size: 1rem; color: var(--cyan); }
+  .rt h2 { font-size: 1.32rem; line-height: 1.15; }
+  .rt p { color: #b6c1dc; line-height: 1.6; font-size: .99rem; }
+  .rt-link {
+    display: inline-flex; align-items: center; gap: .45rem; margin-top: .5rem;
+    font-family: var(--font-display); font-weight: 700; font-size: .96rem;
+    color: #fff; text-decoration: none;
+  }
+  .rt-link svg { width: 17px; height: 17px; color: var(--cyan); transition: transform .22s var(--ease); }
+  .rt-link:hover { color: var(--cyan); }
+  .rt-link:hover svg { transform: translateX(4px); }
+  .rt-chips { list-style: none; margin: .7rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+  .rt-chips a {
+    display: inline-block; padding: .32rem .7rem; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
+    color: #dbe2f0; text-decoration: none; font-size: .84rem; font-weight: 600;
+  }
+  .rt-chips a:hover { background: rgba(54,198,244,.18); border-color: var(--cyan); color: #fff; }
+
+  /* ----------------------------------------------------------------- form */
+  .final-in { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
+  @media (max-width: 940px) { .final-in { grid-template-columns: 1fr; } }
+  .final-text h2 { margin-block: .55rem .8rem; }
+  .final-ticks { margin-top: 1.5rem; }
+  .final-fig { margin: 2rem 0 0; }
+  .final-fig :global(img) { width: 100%; max-width: 420px; border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; }
+  .final-fig figcaption { margin-top: .7rem; font-size: .88rem; color: var(--ink-3); max-width: 46ch; }
+  .final-form {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-xl);
+    padding: clamp(1.5rem, 3vw, 2.25rem); box-shadow: var(--shadow);
+  }
+</style>

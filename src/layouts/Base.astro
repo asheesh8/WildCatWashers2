@@ -1,0 +1,176 @@
+---
+import '@/styles/global.css';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import StickyCTA from '@/components/StickyCTA.astro';
+import { company } from '@/data/business';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Path only, e.g. "/services/window-cleaning/" */
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  /** Extra JSON-LD nodes to merge into the page graph. */
+  schema?: Record<string, any>[];
+  breadcrumbs?: { name: string; href: string }[];
+}
+
+const {
+  title,
+  description,
+  canonical = Astro.url.pathname,
+  ogImage = '/og-default.jpg',
+  noindex = false,
+  schema = [],
+  breadcrumbs = [],
+} = Astro.props;
+
+const site = company.url;
+const canonicalUrl = new URL(canonical, site).href;
+const ogUrl = new URL(ogImage, site).href;
+
+/* ---------------------------------------------------------- JSON-LD graph */
+const localBusiness = {
+  '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'],
+  '@id': `${site}/#business`,
+  name: company.name,
+  description: company.shortDescription,
+  slogan: company.tagline,
+  url: site,
+  telephone: company.phoneRaw,
+  email: company.email,
+  image: `${site}/brand/logo-stacked.svg`,
+  logo: `${site}/brand/logo-stacked.svg`,
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: company.city,
+    addressRegion: company.state,
+    addressCountry: 'US',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: company.geo.lat, longitude: company.geo.lng },
+  areaServed: { '@type': 'GeoCircle', geoMidpoint: { '@type': 'GeoCoordinates', latitude: company.geo.lat, longitude: company.geo.lng }, geoRadius: company.serviceRadiusM },
+  openingHoursSpecification: company.hours.map((h) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: h.days,
+    opens: h.open,
+    closes: h.close,
+  })),
+  founder: company.founders.map((n) => ({ '@type': 'Person', name: n })),
+  sameAs: Object.values(company.social).filter(Boolean),
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${site}/#website`,
+  url: site,
+  name: company.name,
+  publisher: { '@id': `${site}/#business` },
+};
+
+const breadcrumbNode =
+  breadcrumbs.length > 0
+    ? [
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [{ name: 'Home', href: '/' }, ...breadcrumbs].map((b, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: b.name,
+            item: new URL(b.href, site).href,
+          })),
+        },
+      ]
+    : [];
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [localBusiness, website, ...breadcrumbNode, ...schema],
+};
+---
+
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+
+    <meta name="theme-color" content="#121832" />
+    <meta name="format-detection" content="telephone=yes" />
+    <meta name="geo.region" content="US-AZ" />
+    <meta name="geo.placename" content="Tucson, Arizona" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Figtree:wght@400;500;600;700;800&display=swap"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(graph)} is:inline />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    {/* Pages can push a full-bleed element above the navigation — the homepage
+        puts its film here, so the header sits beneath it and sticks on scroll. */}
+    <slot name="above-header" />
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <StickyCTA />
+
+    {import.meta.env.DEV && (
+      <script is:inline src="/dev-audit.js"></script>
+    )}
+
+    <script is:inline>
+      // Scroll reveal — progressive enhancement only.
+      (() => {
+        const els = document.querySelectorAll('.reveal');
+        if (!els.length) return;
+        if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          els.forEach((e) => e.classList.add('in'));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in');
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+        );
+        els.forEach((e) => io.observe(e));
+      })();
+    </script>
+  </body>
+</html>

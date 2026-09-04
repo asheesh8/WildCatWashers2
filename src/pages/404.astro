@@ -1,0 +1,42 @@
+---
+import Base from '@/layouts/Base.astro';
+import AskWildcat from '@/components/AskWildcat.astro';
+import { services, locations, company } from '@/data/business';
+---
+<Base title="Page not found | Wildcat Washers" description="That page doesn't exist. Here's how to find what you were after." canonical="/404/" noindex={true}>
+  <section class="section">
+    <div class="wrap-narrow nf">
+      <p class="eyebrow">404</p>
+      <h1>That page isn’t here.</h1>
+      <p class="lede">It may have moved, or the link may be wrong. Tell us what you were looking for and we’ll point you at it.</p>
+      <div class="nf-ask"><AskWildcat variant="inline" placeholder="What were you looking for?" /></div>
+      <div class="nf-links">
+        <div>
+          <h2>Services</h2>
+          <ul>{services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.name}</a></li>)}</ul>
+        </div>
+        <div>
+          <h2>Service areas</h2>
+          <ul>{locations.map((l) => <li><a href={`/areas/${l.slug}/`}>{l.name}</a></li>)}</ul>
+        </div>
+      </div>
+      <div class="nf-cta">
+        <a class="btn" href="/quote/">Get a free quote</a>
+        <a class="btn btn-ghost" href={`tel:${company.phoneRaw}`}>Call {company.phone}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { display: grid; gap: 1rem; }
+  .nf h1 { font-size: var(--step-4); text-transform: none; }
+  .nf-ask { margin-block: 1rem 1.5rem; }
+  .nf-links { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding-block: 1.5rem; border-block: 1px solid var(--line); }
+  @media (max-width: 560px) { .nf-links { grid-template-columns: 1fr; } }
+  .nf-links h2 { font-size: 1rem; letter-spacing: .06em; margin-bottom: .7rem; }
+  .nf-links ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+  .nf-links a { color: var(--ink-2); text-decoration: none; font-weight: 600; }
+  .nf-links a:hover { color: var(--cyan-600); }
+  .nf-cta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1rem; }
+</style>
