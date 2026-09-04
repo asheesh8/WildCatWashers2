@@ -10,6 +10,19 @@ export interface Props {
   id?: string;
 }
 const { service, area, compact = false, id = 'quote-form' } = Astro.props;
+
+/**
+ * Where the form posts.
+ *
+ * Set PUBLIC_QUOTE_ENDPOINT to any service that accepts a plain POST — Formspree,
+ * Basin, a Zapier/Make catch hook, your own function. Netlify Forms works with no
+ * endpoint at all, via the data-netlify attributes below.
+ *
+ * On a host that is neither (Vercel with nothing configured), the submit handler
+ * does NOT pretend to succeed: it shows the visitor a call/email fallback with
+ * their answers preserved, so a lead is never silently swallowed.
+ */
+const endpoint = import.meta.env.PUBLIC_QUOTE_ENDPOINT ?? '';
 ---
 
 <form
@@ -21,6 +34,9 @@ const { service, area, compact = false, id = 'quote-form' } = Astro.props;
   data-netlify="true"
   netlify-honeypot="company-website"
   data-quote-form
+  data-endpoint={endpoint}
+  data-phone={company.phoneRaw}
+  data-email={company.email}
 >
   {/* Netlify/most static hosts need the form name echoed as a hidden field. */}
   <input type="hidden" name="form-name" value="quote" />
@@ -97,6 +113,15 @@ const { service, area, compact = false, id = 'quote-form' } = Astro.props;
   <p class="qf-alt">
     Rather just talk to someone? <a class="tel-link" href={`tel:${company.phoneRaw}`} data-track="call-form">{company.phone}</a>
   </p>
+
+  <div class="qf-fallback" data-qf-fallback hidden role="alert">
+    <p class="qf-fallback-head">We couldn&rsquo;t send that automatically.</p>
+    <p>Nothing is lost &mdash; send it straight to us instead and we&rsquo;ll price it the same day.</p>
+    <div class="qf-fallback-actions">
+      <a class="btn btn-sm" href={`tel:${company.phoneRaw}`} data-track="call-form-fallback">Call {company.phone}</a>
+      <a class="btn btn-sm btn-ghost" data-qf-mailto href={`mailto:${company.email}`}>Email your details</a>
+    </div>
+  </div>
 </form>
 
 <style>
@@ -144,6 +169,14 @@ const { service, area, compact = false, id = 'quote-form' } = Astro.props;
   .qf-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   .qf-note { font-size: .9rem; color: var(--ink-3); line-height: 1.5; text-align: center; }
+
+  .qf-fallback {
+    background: #fff8e6; border: 1px solid #f0d489; border-left: 5px solid #e0a800;
+    border-radius: 12px; padding: 1rem 1.15rem; display: grid; gap: .5rem;
+  }
+  .qf-fallback-head { font-family: var(--font-display); font-weight: 800; color: #6b5200; }
+  .qf-fallback p { font-size: .93rem; color: #6b5200; line-height: 1.5; }
+  .qf-fallback-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
   .qf-alt { font-size: .95rem; color: var(--ink-2); text-align: center; }
   .qf-alt .tel-link { font-size: 1.05rem; }
 
@@ -166,6 +199,62 @@ const { service, area, compact = false, id = 'quote-form' } = Astro.props;
         const el = form.querySelector('[data-qf-area]');
         if (el && [...el.options].some((o) => o.value === area)) el.value = area;
       }
+    });
+  })();
+
+  /**
+   * Submit handling.
+   *
+   * With an endpoint configured we POST there and send the visitor to the thank-you
+   * page. With nothing configured we do not fake a success — we show the call/email
+   * fallback with their answers already written into the mail body.
+   *
+   * On Netlify the native form handler takes over before any of this matters.
+   */
+  (() => {
+    const onNetlify = /netlify\.app$/.test(location.hostname) || document.documentElement.dataset.netlify === 'true';
+
+    document.querySelectorAll('[data-quote-form]').forEach((form) => {
+      const endpoint = form.dataset.endpoint || '';
+      const fallback = form.querySelector('[data-qf-fallback]');
+      const mailto = form.querySelector('[data-qf-mailto]');
+      if (onNetlify) return; // let Netlify Forms handle it natively
+
+      form.addEventListener('submit', async (e) => {
+        if (!form.reportValidity()) return;
+        e.preventDefault();
+
+        const data = new FormData(form);
+        if (data.get('company-website')) return; // honeypot tripped
+
+        const submit = form.querySelector('button[type=submit]');
+        const label = submit ? submit.textContent : '';
+        if (submit) { submit.disabled = true; submit.textContent = 'Sending…'; }
+
+        const showFallback = () => {
+          if (mailto) {
+            const lines = ['name', 'phone', 'email', 'service', 'area', 'details']
+              .map((k) => `${k}: ${data.get(k) || '—'}`)
+              .join('\n');
+            mailto.href =
+              `mailto:${form.dataset.email}` +
+              `?subject=${encodeURIComponent('Quote request — ' + (data.get('name') || 'website'))}` +
+              `&body=${encodeURIComponent(lines)}`;
+          }
+          if (fallback) { fallback.hidden = false; fallback.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+          if (submit) { submit.disabled = false; submit.textContent = label; }
+        };
+
+        if (!endpoint) return showFallback();
+
+        try {
+          const res = await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+          if (!res.ok) throw new Error(String(res.status));
+          location.assign('/thank-you/');
+        } catch {
+          showFallback();
+        }
+      });
     });
   })();
 </script>

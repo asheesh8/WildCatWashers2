@@ -145,9 +145,18 @@ strictly more truthful for everything it does match.
    (stronger proof anyway). Drop the badge files in and add their paths to the
    `awards` array if you want them.
 
-4. **Wire up the form.** `QuoteForm.astro` posts to `/thank-you/` with Netlify
-   Forms attributes. On Netlify it works as-is. On any other host, point the
-   `action` at your endpoint (Formspree, Basin, a Zapier catch hook, etc.).
+4. **Point the form somewhere.** This is the single most important launch step —
+   it is where the leads come from.
+
+   - **Netlify:** works as-is. Netlify Forms picks up the `data-netlify`
+     attributes; nothing to configure.
+   - **Vercel or anywhere else:** set `PUBLIC_QUOTE_ENDPOINT` to any URL that
+     accepts a plain `POST` (Formspree, Basin, a Zapier/Make catch hook, your own
+     function). See `.env.example`.
+
+   If nothing is configured the form **does not pretend to succeed**. It shows the
+   visitor a call/email fallback with their answers already written into the mail
+   body, so a lead is never silently swallowed — but set the endpoint anyway.
 
 5. **Confirm social profile URLs** in `company.social` — currently a guess, and
    they feed the `sameAs` property in the LocalBusiness schema.
@@ -241,8 +250,20 @@ this page justify existing if Google did not?* If not, merge it or leave it out.
 
 ## Deploying
 
-`netlify.toml` and `vercel.json` are both included with security headers,
-immutable caching for `/_astro/*`, and 301s from the old `.html` URLs.
+Both hosts are configured — security headers, immutable caching for `/_astro/*`,
+and 301s from the old `.html` URLs.
 
-Netlify is the path of least resistance because the quote form works with no
-backend. Point the build at `npm run build`, publish `dist/`.
+**Vercel** (`vercel.json`) — import the repo; the framework preset, build command
+and output directory are all declared, so it should need no clicking. Then:
+
+1. Add `PUBLIC_QUOTE_ENDPOINT` under Settings → Environment Variables (see above).
+2. Point `wildcatwashers.com` at the project and set **www** as primary — the
+   canonical URLs and sitemap are built against `https://www.wildcatwashers.com`
+   (`site` in `astro.config.mjs`). Change that value if the domain changes.
+
+**Netlify** (`netlify.toml`) — build `npm run build`, publish `dist/`. The quote
+form needs no backend here.
+
+Note that preview deployments still emit canonicals and a sitemap pointing at the
+production domain. That is correct for production and harmless on previews, but
+do not submit a preview URL to Search Console.
